@@ -11,8 +11,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import structlog
-from langchain.agents import AgentExecutor, create_react_agent
-from langchain.prompts import PromptTemplate
+from langchain_classic.agents import AgentExecutor, create_react_agent
+from langchain_core.prompts import PromptTemplate
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool
 

@@ -43,7 +43,7 @@ class DuckDuckGoAdapter(SearchPort):
         self,
         query: str,
         max_results: int = 5,
-        region: str = "wt-wt",
+        region: str = "us-en",
     ) -> list[WebSearchResult]:
         """
         Perform a web search using DuckDuckGo.
@@ -51,7 +51,7 @@ class DuckDuckGoAdapter(SearchPort):
         Args:
             query: Search query string
             max_results: Maximum results to return
-            region: Region code (wt-wt = worldwide)
+            region: Region code (us-en = United States English)
 
         Returns:
             List of WebSearchResult objects
