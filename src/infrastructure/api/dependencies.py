@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     llm_model: str = "llama-3.3-70b-versatile"
 
     # API Configuration
-    api_host: str = "0.0.0.0"
+    api_host: str = "0.0.0.0"  # nosec B104
     api_port: int = 8000
     api_debug: bool = False
 
