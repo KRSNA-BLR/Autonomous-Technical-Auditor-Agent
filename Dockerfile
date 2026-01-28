@@ -8,7 +8,7 @@
 # -----------------------------------------------------------------------------
 # Stage 1: Builder - Install dependencies and build the application
 # -----------------------------------------------------------------------------
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -28,7 +28,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy dependency files
 WORKDIR /app
-COPY pyproject.toml ./
+COPY pyproject.toml README.md ./
+COPY src/ ./src/
 
 # Install dependencies
 RUN pip install --upgrade pip && \
@@ -38,7 +39,7 @@ RUN pip install --upgrade pip && \
 # -----------------------------------------------------------------------------
 # Stage 2: Production - Minimal runtime image
 # -----------------------------------------------------------------------------
-FROM python:3.11-slim as production
+FROM python:3.11-slim AS production
 
 # Labels for container metadata
 LABEL maintainer="Your Name <your.email@example.com>" \
@@ -68,7 +69,7 @@ WORKDIR /app
 
 # Copy application code
 COPY --chown=appuser:appgroup src/ ./src/
-COPY --chown=appuser:appgroup pyproject.toml ./
+COPY --chown=appuser:appgroup pyproject.toml README.md ./
 
 # Install the application
 RUN pip install -e . --no-deps
@@ -89,7 +90,7 @@ CMD ["uvicorn", "src.infrastructure.api.main:app", "--host", "0.0.0.0", "--port"
 # -----------------------------------------------------------------------------
 # Stage 3: Development - With dev dependencies
 # -----------------------------------------------------------------------------
-FROM production as development
+FROM production AS development
 
 # Switch to root to install dev dependencies
 USER root
