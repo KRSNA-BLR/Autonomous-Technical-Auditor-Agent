@@ -8,7 +8,7 @@ including individual search results and aggregated findings.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Self
+from typing import Any
 from uuid import UUID, uuid4
 
 
@@ -64,7 +64,7 @@ class SearchResult:
         url: str,
         snippet: str,
         credibility: SourceCredibility = SourceCredibility.UNKNOWN,
-    ) -> Self:
+    ) -> "SearchResult":
         """Factory method to create a SearchResult."""
         return cls(
             title=title.strip(),
@@ -122,7 +122,7 @@ class ResearchResult:
             raise ValueError("Processing time cannot be negative")
 
     @classmethod
-    def create_pending(cls, query_id: UUID) -> Self:
+    def create_pending(cls, query_id: UUID) -> "ResearchResult":
         """Create a pending research result."""
         return cls(
             id=uuid4(),
@@ -144,7 +144,7 @@ class ResearchResult:
         synthesis: str,
         confidence_score: float,
         processing_time_ms: int,
-    ) -> Self:
+    ) -> "ResearchResult":
         """Create a completed research result with findings."""
         return ResearchResult(
             id=self.id,
@@ -159,7 +159,7 @@ class ResearchResult:
             completed_at=datetime.now(),
         )
 
-    def mark_failed(self, error_message: str) -> Self:
+    def mark_failed(self, error_message: str) -> "ResearchResult":
         """Create a failed research result."""
         return ResearchResult(
             id=self.id,
@@ -189,7 +189,7 @@ class ResearchResult:
         """Check if the research was successful."""
         return self.is_complete and self.confidence_score > 0.3
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "id": str(self.id),

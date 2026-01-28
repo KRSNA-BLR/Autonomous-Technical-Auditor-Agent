@@ -8,7 +8,6 @@ following the principle of making invalid states unrepresentable.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Self
 from uuid import UUID, uuid4
 
 
@@ -77,7 +76,7 @@ class ResearchQuery:
         priority: QueryPriority = QueryPriority.MEDIUM,
         max_sources: int = 5,
         keywords: tuple[str, ...] | None = None,
-    ) -> Self:
+    ) -> "ResearchQuery":
         """
         Factory method to create a new ResearchQuery.
 
@@ -103,7 +102,7 @@ class ResearchQuery:
             keywords=keywords or (),
         )
 
-    def with_keywords(self, keywords: tuple[str, ...]) -> Self:
+    def with_keywords(self, keywords: tuple[str, ...]) -> "ResearchQuery":
         """Create a new query with updated keywords (immutable update)."""
         return ResearchQuery(
             id=self.id,

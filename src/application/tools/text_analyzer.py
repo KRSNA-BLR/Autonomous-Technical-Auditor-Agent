@@ -54,14 +54,14 @@ class TextAnalyzerTool(BaseTool):
         "Use analysis_type to specify what kind of analysis you need."
     )
     args_schema: type[BaseModel] = TextAnalysisInput
-    llm: BaseLanguageModel | None = None
+    llm: BaseLanguageModel[Any] | None = None
 
     class Config:
         """Pydantic config."""
 
         arbitrary_types_allowed = True
 
-    def __init__(self, llm: BaseLanguageModel | None = None, **kwargs: Any) -> None:
+    def __init__(self, llm: BaseLanguageModel[Any] | None = None, **kwargs: Any) -> None:
         """Initialize the text analyzer with an optional LLM."""
         super().__init__(**kwargs)
         self.llm = llm

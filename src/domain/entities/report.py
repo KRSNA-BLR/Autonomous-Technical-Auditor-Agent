@@ -8,7 +8,7 @@ with proper formatting and organization of findings.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Self
+from typing import Any
 from uuid import UUID, uuid4
 
 from src.domain.entities.research import ResearchResult
@@ -53,7 +53,7 @@ class ReportSection:
         content: str,
         order: int,
         sources: tuple[str, ...] | None = None,
-    ) -> Self:
+    ) -> "ReportSection":
         """Factory method to create a ReportSection."""
         return cls(
             title=title.strip(),
@@ -62,7 +62,7 @@ class ReportSection:
             sources=sources or (),
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "title": self.title,
@@ -116,7 +116,7 @@ class ResearchReport:
         sections: tuple[ReportSection, ...],
         recommendations: tuple[str, ...],
         report_format: ReportFormat = ReportFormat.JSON,
-    ) -> Self:
+    ) -> "ResearchReport":
         """
         Factory method to create a report from research results.
 
@@ -175,7 +175,7 @@ class ResearchReport:
         """Get sections sorted by order."""
         return sorted(self.sections, key=lambda s: s.order)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": str(self.id),

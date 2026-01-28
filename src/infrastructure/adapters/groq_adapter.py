@@ -11,6 +11,7 @@ from typing import Any, ClassVar
 
 import structlog
 from langchain_groq import ChatGroq
+from pydantic import SecretStr
 
 from src.domain.ports.llm_port import (
     LLMConnectionError,
@@ -62,7 +63,7 @@ class GroqLLMAdapter(LLMPort):
         self._max_tokens = max_tokens
 
         self._client = ChatGroq(
-            api_key=api_key,
+            api_key=SecretStr(api_key),
             model=model,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -114,7 +115,7 @@ class GroqLLMAdapter(LLMPort):
             client = self._client
             if temperature is not None or max_tokens is not None:
                 client = ChatGroq(
-                    api_key=self._api_key,
+                    api_key=SecretStr(self._api_key),
                     model=self._model,
                     temperature=temperature or self._temperature,
                     max_tokens=max_tokens or self._max_tokens,
@@ -186,7 +187,8 @@ class GroqLLMAdapter(LLMPort):
                 lines = content.split("\n")
                 content = "\n".join(lines[1:-1])
 
-            return json.loads(content)
+            result: dict[str, Any] = json.loads(content)
+            return result
 
         except json.JSONDecodeError as e:
             raise LLMResponseError(f"Failed to parse JSON response: {e}", e)

@@ -8,7 +8,7 @@ technical research autonomously.
 
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import structlog
 from langchain_classic.agents import AgentExecutor, create_react_agent
@@ -88,7 +88,7 @@ class ResearchAgentService:
 
     def __init__(
         self,
-        llm: BaseLanguageModel,
+        llm: BaseLanguageModel[Any],
         tools: list[BaseTool],
         memory_manager: MemoryManager,
         config: AgentConfig | None = None,
@@ -125,7 +125,7 @@ class ResearchAgentService:
         )
 
         return AgentExecutor(
-            agent=agent,  # type: ignore
+            agent=cast("Any", agent),
             tools=self._tools,
             verbose=self._config.verbose,
             max_iterations=self._config.max_iterations,
