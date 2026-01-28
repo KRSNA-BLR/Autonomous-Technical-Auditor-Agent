@@ -1,0 +1,96 @@
+# =============================================================================
+# Docker Compose - Development & Production Configuration
+# =============================================================================
+# This file defines the services for running the research agent locally.
+# Usage:
+#   Development: docker-compose up --build
+#   Production:  docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Research Agent API Service
+  # ---------------------------------------------------------------------------
+  research-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development  # Use 'production' for prod deployments
+    container_name: research-agent
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      # Groq API Configuration (FREE - get key at console.groq.com)
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LLM_MODEL=${LLM_MODEL:-llama-3.3-70b-versatile}
+      # API Configuration
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_DEBUG=${API_DEBUG:-true}
+      # Agent Configuration
+      - AGENT_MAX_ITERATIONS=${AGENT_MAX_ITERATIONS:-10}
+      - AGENT_MEMORY_SIZE=${AGENT_MEMORY_SIZE:-20}
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      # Mount source code for hot-reloading in development
+      - ./src:/app/src:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - research-network
+
+  # ---------------------------------------------------------------------------
+  # Frontend React Application
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: research-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - research-agent
+    environment:
+      - VITE_API_URL=http://research-agent:8000
+    networks:
+      - research-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Optional: Redis for distributed caching (future enhancement)
+  # ---------------------------------------------------------------------------
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: research-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   networks:
+  #     - research-network
+
+# -----------------------------------------------------------------------------
+# Networks
+# -----------------------------------------------------------------------------
+networks:
+  research-network:
+    driver: bridge
+    name: research-network
+
+# -----------------------------------------------------------------------------
+# Volumes (for future persistent storage)
+# -----------------------------------------------------------------------------
+# volumes:
+#   redis-data:
