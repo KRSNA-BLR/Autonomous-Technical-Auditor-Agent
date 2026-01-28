@@ -52,21 +52,25 @@ class WebSearchTool(BaseTool):
             Formatted search results string
         """
         try:
-            from duckduckgo_search import DDGS
+            # Use new ddgs package (recommended replacement for duckduckgo-search)
+            try:
+                from ddgs import DDGS
+            except ImportError:
+                from duckduckgo_search import DDGS
 
             logger.info("Executing web search", query=query, max_results=max_results)
 
             results = []
-            with DDGS() as ddgs:
-                search_results = list(ddgs.text(query, max_results=max_results))
+            ddgs = DDGS()
+            search_results = list(ddgs.text(query, max_results=max_results))
 
-                for i, result in enumerate(search_results, 1):
-                    results.append(
-                        f"Result {i}:\n"
-                        f"Title: {result.get('title', 'N/A')}\n"
-                        f"URL: {result.get('href', 'N/A')}\n"
-                        f"Snippet: {result.get('body', 'N/A')}\n"
-                    )
+            for i, result in enumerate(search_results, 1):
+                results.append(
+                    f"Result {i}:\n"
+                    f"Title: {result.get('title', 'N/A')}\n"
+                    f"URL: {result.get('href', 'N/A')}\n"
+                    f"Snippet: {result.get('body', 'N/A')}\n"
+                )
 
             if not results:
                 return "No results found for the query."
@@ -75,8 +79,8 @@ class WebSearchTool(BaseTool):
             return "\n".join(results)
 
         except ImportError:
-            logger.error("duckduckgo-search not installed")
-            return "Error: Search functionality not available. Please install duckduckgo-search."
+            logger.error("ddgs/duckduckgo-search not installed")
+            return "Error: Search functionality not available. Please install ddgs."
         except Exception as e:
             logger.error("Search failed", error=str(e))
             return f"Error performing search: {e!s}"
@@ -117,23 +121,27 @@ class NewsSearchTool(BaseTool):
     def _run(self, query: str, max_results: int = 5) -> str:
         """Execute a synchronous news search."""
         try:
-            from duckduckgo_search import DDGS
+            # Use new ddgs package (recommended replacement for duckduckgo-search)
+            try:
+                from ddgs import DDGS
+            except ImportError:
+                from duckduckgo_search import DDGS
 
             logger.info("Executing news search", query=query)
 
             results = []
-            with DDGS() as ddgs:
-                news_results = list(ddgs.news(query, max_results=max_results))
+            ddgs = DDGS()
+            news_results = list(ddgs.news(query, max_results=max_results))
 
-                for i, result in enumerate(news_results, 1):
-                    results.append(
-                        f"News {i}:\n"
-                        f"Title: {result.get('title', 'N/A')}\n"
-                        f"Source: {result.get('source', 'N/A')}\n"
-                        f"URL: {result.get('url', 'N/A')}\n"
-                        f"Published: {result.get('date', 'N/A')}\n"
-                        f"Summary: {result.get('body', 'N/A')}\n"
-                    )
+            for i, result in enumerate(news_results, 1):
+                results.append(
+                    f"News {i}:\n"
+                    f"Title: {result.get('title', 'N/A')}\n"
+                    f"Source: {result.get('source', 'N/A')}\n"
+                    f"URL: {result.get('url', 'N/A')}\n"
+                    f"Published: {result.get('date', 'N/A')}\n"
+                    f"Summary: {result.get('body', 'N/A')}\n"
+                )
 
             if not results:
                 return "No news articles found for the query."

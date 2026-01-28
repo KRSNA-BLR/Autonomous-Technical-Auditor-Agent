@@ -18,6 +18,7 @@ from src.application.services.research_agent import AgentConfig, ResearchAgentSe
 from src.application.services.sqlite_memory import SQLiteMemoryManager
 from src.application.tools.text_analyzer import TextAnalyzerTool
 from src.application.tools.web_search import NewsSearchTool, WebSearchTool
+from src.domain.ports.llm_port import LLMPort
 from src.infrastructure.adapters.groq_adapter import GroqLLMAdapter
 
 logger = structlog.get_logger(__name__)
@@ -26,10 +27,18 @@ logger = structlog.get_logger(__name__)
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
+    # LLM Provider Selection (gemini, groq, or auto for fallback)
+    llm_provider: str = "auto"
+
+    # Google Gemini Configuration (FREE at aistudio.google.com)
+    google_api_key: str = ""
+    gemini_model: str = "gemini-2.5-flash"
+
     # Groq Configuration (FREE API key from console.groq.com)
     groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
 
-    # LLM Model Selection
+    # Legacy: LLM Model Selection (deprecated, use gemini_model/groq_model)
     llm_model: str = "llama-3.3-70b-versatile"
 
     # API Configuration
@@ -94,49 +103,80 @@ def get_memory_manager() -> MemoryManager:
     return _memory_manager
 
 
+# LLM adapter singleton for consistent state
+_llm_adapter: LLMPort | None = None
+
+
 def get_llm_adapter(
     settings: Annotated[Settings, Depends(get_settings)],
-) -> GroqLLMAdapter:
+) -> LLMPort:
     """
     Get the LLM adapter instance.
+    
+    Priority:
+    1. Groq (if GROQ_API_KEY configured) - reliable, fast
+    2. Gemini (if GOOGLE_API_KEY configured) - fallback
 
     Args:
         settings: Application settings
 
     Returns:
-        Configured GroqLLMAdapter
+        Configured LLM adapter
+        
+    Raises:
+        ValueError: If no API key is configured
     """
-    if not settings.groq_api_key:
-        raise ValueError(
-            "GROQ_API_KEY not set. Get your FREE API key at: https://console.groq.com/keys"
-        )
-
-    return GroqLLMAdapter(
-        api_key=settings.groq_api_key,
-        model=settings.llm_model,
-    )
+    global _llm_adapter
+    
+    if _llm_adapter is None:
+        # Priority 1: Use Groq if configured (more reliable)
+        if settings.groq_api_key:
+            _llm_adapter = GroqLLMAdapter(
+                api_key=settings.groq_api_key,
+                model=settings.groq_model or settings.llm_model,
+            )
+            logger.info(
+                "LLM adapter created",
+                provider="groq",
+                model=settings.groq_model or settings.llm_model,
+            )
+        # Priority 2: Use Gemini as fallback
+        elif settings.google_api_key:
+            from src.infrastructure.adapters.gemini_adapter import GeminiLLMAdapter
+            _llm_adapter = GeminiLLMAdapter(
+                api_key=settings.google_api_key,
+                model=settings.gemini_model,
+            )
+            logger.info(
+                "LLM adapter created",
+                provider="gemini", 
+                model=settings.gemini_model,
+            )
+        else:
+            raise ValueError(
+                "No LLM API key configured. Set GROQ_API_KEY or GOOGLE_API_KEY. "
+                "Get free keys at: https://console.groq.com/keys or https://aistudio.google.com"
+            )
+    
+    return _llm_adapter
 
 
 def get_tools(
     settings: Annotated[Settings, Depends(get_settings)],
+    llm_adapter: Annotated[LLMPort, Depends(get_llm_adapter)],
 ) -> list[BaseTool]:
     """
     Get the list of tools available to the agent.
 
     Args:
         settings: Application settings
+        llm_adapter: LLM adapter for text analysis
 
     Returns:
         List of configured tools
     """
-    # Initialize LLM for text analyzer if API key is available
-    llm = None
-    if settings.groq_api_key:
-        adapter = GroqLLMAdapter(
-            api_key=settings.groq_api_key,
-            model=settings.llm_model,
-        )
-        llm = adapter.get_langchain_llm()
+    # Use the LLM adapter for text analyzer
+    llm = llm_adapter.get_langchain_llm()
 
     tools: list[BaseTool] = [
         WebSearchTool(),
@@ -150,7 +190,7 @@ def get_tools(
 
 def get_research_agent(
     settings: Annotated[Settings, Depends(get_settings)],
-    llm_adapter: Annotated[GroqLLMAdapter, Depends(get_llm_adapter)],
+    llm_adapter: Annotated[LLMPort, Depends(get_llm_adapter)],
     tools: Annotated[list[BaseTool], Depends(get_tools)],
     memory: Annotated[MemoryManager, Depends(get_memory_manager)],
 ) -> ResearchAgentService:

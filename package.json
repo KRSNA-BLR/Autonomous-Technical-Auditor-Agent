@@ -1,0 +1,16 @@
+{
+  "name": "autonomous-research-agent",
+  "version": "1.0.0",
+  "description": "Full-stack development scripts for Autonomous Tech Research Agent",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n API,WEB -c cyan,magenta \"npm run backend\" \"npm run frontend\"",
+    "backend": "uvicorn src.infrastructure.api.main:app --host 0.0.0.0 --port 8000 --reload",
+    "frontend": "cd frontend && npm run dev -- --port 3000",
+    "install:all": "npm install && cd frontend && npm install",
+    "build": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
