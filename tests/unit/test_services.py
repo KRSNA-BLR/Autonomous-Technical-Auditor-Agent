@@ -5,25 +5,51 @@ These tests verify the business logic in the application layer,
 including the memory manager and agent configuration.
 """
 
-import pytest
+import gc
+import os
+import tempfile
+import time
 from datetime import datetime
+from pathlib import Path
 
-from src.application.services.memory_manager import MemoryManager, MemoryEntry
+import pytest
+
+from src.application.services.sqlite_memory import MemoryEntry, SQLiteMemoryManager
+
+
+@pytest.fixture
+def temp_db_path() -> str:
+    """Create a temporary database path for each test."""
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    yield path
+    # Force garbage collection to release SQLite connections on Windows
+    gc.collect()
+    time.sleep(0.1)
+    # Cleanup after test
+    for _ in range(3):
+        try:
+            if Path(path).exists():
+                Path(path).unlink()
+            break
+        except PermissionError:
+            gc.collect()
+            time.sleep(0.2)
 
 
 class TestMemoryManager:
-    """Tests for MemoryManager service."""
+    """Tests for SQLiteMemoryManager service."""
 
-    def test_create_memory_manager(self) -> None:
+    def test_create_memory_manager(self, temp_db_path: str) -> None:
         """Test creating a memory manager."""
-        memory = MemoryManager(max_entries=10)
-        
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
+
         assert len(memory) == 0
         assert memory.max_entries == 10
 
-    def test_add_interaction(self) -> None:
+    def test_add_interaction(self, temp_db_path: str) -> None:
         """Test adding an interaction to memory."""
-        memory = MemoryManager(max_entries=10)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
         memory.add_interaction(
             query="What is FastAPI?",
             response="FastAPI is a modern web framework...",
@@ -35,9 +61,9 @@ class TestMemoryManager:
         assert entries[0].query == "What is FastAPI?"
         assert entries[0].response == "FastAPI is a modern web framework..."
 
-    def test_memory_limit(self) -> None:
+    def test_memory_limit(self, temp_db_path: str) -> None:
         """Test that memory respects max_entries limit."""
-        memory = MemoryManager(max_entries=3)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=3)
 
         for i in range(5):
             memory.add_interaction(
@@ -53,9 +79,9 @@ class TestMemoryManager:
         assert "Query 1" not in queries
         assert "Query 4" in queries
 
-    def test_get_recent_context(self) -> None:
+    def test_get_recent_context(self, temp_db_path: str) -> None:
         """Test getting recent context."""
-        memory = MemoryManager(max_entries=10)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
 
         for i in range(5):
             memory.add_interaction(
@@ -67,9 +93,9 @@ class TestMemoryManager:
         assert len(recent) == 3
         assert recent[-1].query == "Query 4"
 
-    def test_get_relevant_context(self) -> None:
+    def test_get_relevant_context(self, temp_db_path: str) -> None:
         """Test getting relevant context based on query."""
-        memory = MemoryManager(max_entries=10)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
 
         memory.add_interaction(
             query="How to deploy FastAPI?",
@@ -89,9 +115,9 @@ class TestMemoryManager:
         assert "FastAPI" in context
         assert "deploy" in context.lower() or "performance" in context.lower()
 
-    def test_get_relevant_context_no_matches(self) -> None:
+    def test_get_relevant_context_no_matches(self, temp_db_path: str) -> None:
         """Test getting relevant context with no matches."""
-        memory = MemoryManager(max_entries=10)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
 
         memory.add_interaction(
             query="Python basics",
@@ -102,9 +128,9 @@ class TestMemoryManager:
         # Should return empty string if no relevant matches
         assert context == "" or "Python" not in context
 
-    def test_memory_summary(self) -> None:
+    def test_memory_summary(self, temp_db_path: str) -> None:
         """Test getting memory summary."""
-        memory = MemoryManager(max_entries=10)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
 
         memory.add_interaction(query="Test 1", response="Response 1")
         memory.add_interaction(query="Test 2", response="Response 2")
@@ -116,9 +142,9 @@ class TestMemoryManager:
         assert summary["oldest_entry"] is not None
         assert summary["newest_entry"] is not None
 
-    def test_clear_memory(self) -> None:
+    def test_clear_memory(self, temp_db_path: str) -> None:
         """Test clearing memory."""
-        memory = MemoryManager(max_entries=10)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
 
         memory.add_interaction(query="Test", response="Response")
         assert len(memory) == 1
@@ -126,9 +152,9 @@ class TestMemoryManager:
         memory.clear()
         assert len(memory) == 0
 
-    def test_memory_to_list(self) -> None:
+    def test_memory_to_list(self, temp_db_path: str) -> None:
         """Test converting memory to list."""
-        memory = MemoryManager(max_entries=10)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
 
         memory.add_interaction(
             query="Test query",
@@ -143,9 +169,9 @@ class TestMemoryManager:
         assert entries[0]["response"] == "Test response"
         assert entries[0]["metadata"]["key"] == "value"
 
-    def test_memory_bool(self) -> None:
+    def test_memory_bool(self, temp_db_path: str) -> None:
         """Test memory truthiness."""
-        memory = MemoryManager(max_entries=10)
+        memory = SQLiteMemoryManager(db_path=temp_db_path, max_entries=10)
 
         assert not memory
         memory.add_interaction(query="Test", response="Response")
@@ -158,6 +184,7 @@ class TestMemoryEntry:
     def test_memory_entry_creation(self) -> None:
         """Test creating a memory entry."""
         entry = MemoryEntry(
+            id=None,
             query="What is Python?",
             response="Python is a programming language.",
             timestamp=datetime.now(),
@@ -172,6 +199,7 @@ class TestMemoryEntry:
         """Test serializing memory entry to dict."""
         now = datetime.now()
         entry = MemoryEntry(
+            id=1,
             query="Test",
             response="Response",
             timestamp=now,
@@ -183,3 +211,4 @@ class TestMemoryEntry:
         assert data["query"] == "Test"
         assert data["response"] == "Response"
         assert data["timestamp"] == now.isoformat()
+        assert data["id"] == 1

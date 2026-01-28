@@ -100,7 +100,7 @@ class ResearchQuery:
             priority=priority,
             max_sources=max_sources,
             created_at=datetime.now(),
-            keywords=keywords or tuple(),
+            keywords=keywords or (),
         )
 
     def with_keywords(self, keywords: tuple[str, ...]) -> Self:

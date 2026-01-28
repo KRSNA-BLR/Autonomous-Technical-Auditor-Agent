@@ -3,6 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Memory database (SQLite)
+data/
+*.db
+
+# Node.js
+node_modules/
+package-lock.json
+
 # C extensions
 *.so
 

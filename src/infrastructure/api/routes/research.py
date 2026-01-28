@@ -114,7 +114,7 @@ async def conduct_research(
         logger.error("Research failed", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Research failed: {str(e)}",
+            detail=f"Research failed: {e!s}",
         )
 
 
@@ -186,7 +186,7 @@ async def generate_research_report(
         logger.error("Report generation failed", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Report generation failed: {str(e)}",
+            detail=f"Report generation failed: {e!s}",
         )
 
 

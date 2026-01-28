@@ -62,13 +62,16 @@ export function useExportPdf(): UseExportPdfReturn {
       yPosition += 5
     }
 
-    // Header
+    // Header - Professional design without emojis
     pdf.setFillColor(99, 102, 241)
     pdf.rect(0, 0, pageWidth, 40, 'F')
     pdf.setTextColor(255, 255, 255)
-    pdf.setFontSize(24)
+    pdf.setFontSize(22)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('🔬 Research Report', margin, 25)
+    pdf.text('RESEARCH REPORT', margin, 22)
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'normal')
+    pdf.text('Autonomous Tech Research Agent', margin, 32)
     
     // Reset text color
     pdf.setTextColor(30, 30, 30)
@@ -80,9 +83,9 @@ export function useExportPdf(): UseExportPdfReturn {
     addWrappedText(`Query ID: ${result.query_id}`, 11, true)
     yPosition += 5
 
-    // Metadata
+    // Metadata - Clean text without emojis
     pdf.setTextColor(100, 100, 100)
-    addWrappedText(`📅 Fecha: ${new Date().toLocaleDateString('es-ES', { 
+    addWrappedText(`Fecha: ${new Date().toLocaleDateString('es-ES', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric',
@@ -91,28 +94,28 @@ export function useExportPdf(): UseExportPdfReturn {
     })}`, 9)
     
     if (result.processing_time_ms) {
-      addWrappedText(`⏱️ Tiempo de procesamiento: ${(result.processing_time_ms / 1000).toFixed(2)}s`, 9)
+      addWrappedText(`Tiempo de procesamiento: ${(result.processing_time_ms / 1000).toFixed(2)}s`, 9)
     }
     
     if (result.confidence_score) {
-      addWrappedText(`📊 Confianza: ${Math.round(result.confidence_score * 100)}%`, 9)
+      addWrappedText(`Confianza: ${Math.round(result.confidence_score * 100)}%`, 9)
     }
     
     pdf.setTextColor(30, 30, 30)
     yPosition += 5
 
-    // Synthesis
+    // Synthesis - Section with accent bar
     pdf.setFillColor(99, 102, 241)
     pdf.rect(margin - 5, yPosition - 3, 3, 15, 'F')
-    addWrappedText('📝 Síntesis', 14, true)
+    addWrappedText('SINTESIS', 14, true)
     addWrappedText(result.synthesis, 10)
     yPosition += 5
 
-    // Key Findings
+    // Key Findings - Section with green accent
     if (result.key_findings && result.key_findings.length > 0) {
       pdf.setFillColor(16, 185, 129)
       pdf.rect(margin - 5, yPosition - 3, 3, 15, 'F')
-      addWrappedText('🎯 Hallazgos Clave', 14, true)
+      addWrappedText('HALLAZGOS CLAVE', 14, true)
       
       result.key_findings.forEach((finding, index) => {
         addWrappedText(`${index + 1}. ${finding}`, 10)
@@ -120,19 +123,29 @@ export function useExportPdf(): UseExportPdfReturn {
       yPosition += 5
     }
 
-    // Sources
+    // Sources - Section with yellow accent and clean formatting
     if (result.sources && result.sources.length > 0) {
       pdf.setFillColor(251, 191, 36)
       pdf.rect(margin - 5, yPosition - 3, 3, 15, 'F')
-      addWrappedText('📚 Fuentes', 14, true)
+      addWrappedText('FUENTES CONSULTADAS', 14, true)
       
       result.sources.forEach((source, index) => {
-        addWrappedText(`${index + 1}. ${source.title}`, 10, true)
+        // Clean title - remove non-printable characters
+        const cleanTitle = source.title.replace(/[^\x20-\x7E\u00C0-\u00FF]/g, '').trim() || 'Fuente sin titulo'
+        addWrappedText(`${index + 1}. ${cleanTitle}`, 10, true)
+        
+        // URL in blue
         pdf.setTextColor(99, 102, 241)
-        addWrappedText(source.url, 8)
+        const cleanUrl = source.url.replace(/[^\x20-\x7E]/g, '').trim()
+        addWrappedText(cleanUrl, 8)
         pdf.setTextColor(30, 30, 30)
+        
+        // Clean snippet - remove non-printable characters
         if (source.snippet) {
-          addWrappedText(source.snippet.substring(0, 200) + '...', 9)
+          const cleanSnippet = source.snippet.replace(/[^\x20-\x7E\u00C0-\u00FF\n]/g, '').trim()
+          if (cleanSnippet.length > 20) {
+            addWrappedText(cleanSnippet.substring(0, 200) + '...', 9)
+          }
         }
         yPosition += 2
       })

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw, Globe, Database } from 'lucide-react'
 
 import { Header } from '@/components/Header'
 import { SearchInput } from '@/components/SearchInput'
@@ -12,11 +12,25 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 import { useResearch, useMemory, useExportPdf } from '@/hooks'
-import { api, AgentStatus } from '@/lib/api'
+import { api, AgentStatus, MAX_SOURCES_OPTIONS } from '@/lib/api'
+
+type Language = 'auto' | 'es' | 'en'
+
+const LANGUAGE_OPTIONS: { value: Language; label: string; flag: string }[] = [
+  { value: 'auto', label: 'Auto-detectar', flag: '🌐' },
+  { value: 'es', label: 'Español', flag: '🇪🇸' },
+  { value: 'en', label: 'English', flag: '🇺🇸' },
+]
 
 function App() {
   // Theme state
   const [isDark, setIsDark] = useState(true)
+  
+  // Language state
+  const [language, setLanguage] = useState<Language>('auto')
+  
+  // Max sources state
+  const [maxSources, setMaxSources] = useState(8)
   
   // API status
   const [status, setStatus] = useState<'online' | 'offline' | 'checking'>('checking')
@@ -68,7 +82,7 @@ function App() {
     if (!question.trim() || isLoading) return
     
     addEntry(question)
-    await research(question)
+    await research(question, { language, maxSources })
   }
 
   // Handle select from memory
@@ -114,6 +128,67 @@ function App() {
             llmAvailable={agentStatus?.llm_available}
             searchAvailable={agentStatus?.search_available}
           />
+        </motion.div>
+
+        {/* Language Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6 flex flex-wrap items-center gap-6"
+        >
+          {/* Language */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-[hsl(var(--muted-foreground))]">
+              <Globe className="w-4 h-4" />
+              <span className="text-sm font-medium">Idioma:</span>
+            </div>
+            <div className="flex gap-2">
+              {LANGUAGE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setLanguage(option.value)}
+                  className={`
+                    px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                    flex items-center gap-1.5
+                    ${language === option.value
+                      ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-md'
+                      : 'bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]'
+                    }
+                  `}
+                >
+                  <span>{option.flag}</span>
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Max Sources */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-[hsl(var(--muted-foreground))]">
+              <Database className="w-4 h-4" />
+              <span className="text-sm font-medium">Fuentes:</span>
+            </div>
+            <div className="flex gap-2">
+              {MAX_SOURCES_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setMaxSources(option.value)}
+                  title={option.description}
+                  className={`
+                    px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                    ${maxSources === option.value
+                      ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-md'
+                      : 'bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]'
+                    }
+                  `}
+                >
+                  {option.value}
+                </button>
+              ))}
+            </div>
+          </div>
         </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-8">

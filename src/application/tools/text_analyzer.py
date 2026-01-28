@@ -81,12 +81,10 @@ class TextAnalyzerTool(BaseTool):
                 f"and explain why:\n\n{text}"
             ),
             "technical_terms": (
-                f"Identify and explain the technical terms "
-                f"used in the following text:\n\n{text}"
+                f"Identify and explain the technical terms used in the following text:\n\n{text}"
             ),
             "pros_cons": (
-                f"List the pros and cons discussed or implied "
-                f"in the following text:\n\n{text}"
+                f"List the pros and cons discussed or implied in the following text:\n\n{text}"
             ),
         }
         return prompts.get(
@@ -119,11 +117,7 @@ class TextAnalyzerTool(BaseTool):
             try:
                 prompt = self._get_analysis_prompt(text, analysis_type)
                 response = self.llm.invoke(prompt)
-                result = (
-                    response.content
-                    if hasattr(response, "content")
-                    else str(response)
-                )
+                result = response.content if hasattr(response, "content") else str(response)
                 logger.info("Analysis completed with LLM")
                 return str(result)
             except Exception as e:
@@ -216,9 +210,7 @@ class TextAnalyzerTool(BaseTool):
             terms = set()
             for word in words:
                 clean_word = word.strip(".,!?()[]{}\"'")
-                if clean_word.isupper() and len(clean_word) > 2:
-                    terms.add(clean_word)
-                elif clean_word in tech_patterns:
+                if (clean_word.isupper() and len(clean_word) > 2) or clean_word in tech_patterns:
                     terms.add(clean_word)
             if terms:
                 return "Technical Terms Found: " + ", ".join(sorted(terms))
@@ -232,14 +224,10 @@ class TextAnalyzerTool(BaseTool):
             sentences = text.replace("\n", " ").split(". ")
             for sentence in sentences:
                 s_lower = sentence.lower()
-                if any(
-                    w in s_lower
-                    for w in ["advantage", "benefit", "pro", "good", "strength"]
-                ):
+                if any(w in s_lower for w in ["advantage", "benefit", "pro", "good", "strength"]):
                     pros.append(sentence.strip())
                 elif any(
-                    w in s_lower
-                    for w in ["disadvantage", "drawback", "con", "issue", "weakness"]
+                    w in s_lower for w in ["disadvantage", "drawback", "con", "issue", "weakness"]
                 ):
                     cons.append(sentence.strip())
 
@@ -256,6 +244,4 @@ class TextAnalyzerTool(BaseTool):
         """Execute text analysis asynchronously."""
         import asyncio
 
-        return await asyncio.get_event_loop().run_in_executor(
-            None, self._run, text, analysis_type
-        )
+        return await asyncio.get_event_loop().run_in_executor(None, self._run, text, analysis_type)

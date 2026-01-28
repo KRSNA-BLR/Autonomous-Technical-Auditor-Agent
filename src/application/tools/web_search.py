@@ -5,8 +5,6 @@ This tool wraps the search port to provide web search capabilities
 to the research agent using DuckDuckGo (free, no API key required).
 """
 
-from typing import Any
-
 import structlog
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
@@ -81,7 +79,7 @@ class WebSearchTool(BaseTool):
             return "Error: Search functionality not available. Please install duckduckgo-search."
         except Exception as e:
             logger.error("Search failed", error=str(e))
-            return f"Error performing search: {str(e)}"
+            return f"Error performing search: {e!s}"
 
     async def _arun(self, query: str, max_results: int = 5) -> str:
         """
@@ -97,9 +95,7 @@ class WebSearchTool(BaseTool):
         # DuckDuckGo search is synchronous, run in executor
         import asyncio
 
-        return await asyncio.get_event_loop().run_in_executor(
-            None, self._run, query, max_results
-        )
+        return await asyncio.get_event_loop().run_in_executor(None, self._run, query, max_results)
 
 
 class NewsSearchTool(BaseTool):
@@ -146,12 +142,10 @@ class NewsSearchTool(BaseTool):
 
         except Exception as e:
             logger.error("News search failed", error=str(e))
-            return f"Error performing news search: {str(e)}"
+            return f"Error performing news search: {e!s}"
 
     async def _arun(self, query: str, max_results: int = 5) -> str:
         """Execute an asynchronous news search."""
         import asyncio
 
-        return await asyncio.get_event_loop().run_in_executor(
-            None, self._run, query, max_results
-        )
+        return await asyncio.get_event_loop().run_in_executor(None, self._run, query, max_results)

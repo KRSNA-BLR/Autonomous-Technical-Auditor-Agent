@@ -21,6 +21,7 @@ class ResearchRequest(BaseModel):
         priority: Priority level (low, medium, high, critical)
         max_sources: Maximum number of sources to consult
         keywords: Optional keywords to focus the search
+        language: Language for search and response (auto, es, en)
     """
 
     question: str = Field(
@@ -57,6 +58,11 @@ class ResearchRequest(BaseModel):
         max_length=10,
         description="Keywords to focus the search",
         examples=[["FastAPI", "performance", "security"]],
+    )
+    language: str = Field(
+        default="auto",
+        description="Language for search and response: auto (detect), es (Spanish), en (English)",
+        examples=["auto", "es", "en"],
     )
 
     model_config = {

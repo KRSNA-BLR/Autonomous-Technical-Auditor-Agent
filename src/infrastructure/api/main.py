@@ -5,29 +5,29 @@ This module configures and runs the FastAPI application with all routes,
 middleware, and exception handlers.
 """
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from src.infrastructure.api.routes import research
 from src.infrastructure.api.dependencies import get_settings
+from src.infrastructure.api.routes import research
 
 logger = structlog.get_logger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """
     Application lifespan handler.
 
     Handles startup and shutdown events for the application.
     """
     # Startup
-    logger.info("🚀 Starting Autonomous Tech Research Agent")
+    logger.info("Starting Autonomous Tech Research Agent")
     settings = get_settings()
     logger.info(
         "Configuration loaded",
@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     # Shutdown
-    logger.info("👋 Shutting down Autonomous Tech Research Agent")
+    logger.info("Shutting down Autonomous Tech Research Agent")
 
 
 def create_app() -> FastAPI:
@@ -77,9 +77,7 @@ def create_app() -> FastAPI:
 
     # Global exception handler
     @app.exception_handler(Exception)
-    async def global_exception_handler(
-        request: Request, exc: Exception
-    ) -> JSONResponse:
+    async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
         logger.error(
             "Unhandled exception",
             path=request.url.path,

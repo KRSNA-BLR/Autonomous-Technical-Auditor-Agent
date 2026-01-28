@@ -59,7 +59,7 @@ class ReportSection:
             title=title.strip(),
             content=content.strip(),
             order=order,
-            sources=sources or tuple(),
+            sources=sources or (),
         )
 
     def to_dict(self) -> dict:
@@ -202,12 +202,14 @@ class ResearchReport:
         ]
 
         for section in self.get_sections_sorted():
-            lines.extend([
-                f"## {section.title}",
-                "",
-                section.content,
-                "",
-            ])
+            lines.extend(
+                [
+                    f"## {section.title}",
+                    "",
+                    section.content,
+                    "",
+                ]
+            )
             if section.sources:
                 lines.append("**Sources:**")
                 for source in section.sources:
@@ -215,18 +217,22 @@ class ResearchReport:
                 lines.append("")
 
         if self.recommendations:
-            lines.extend([
-                "## Recommendations",
-                "",
-            ])
+            lines.extend(
+                [
+                    "## Recommendations",
+                    "",
+                ]
+            )
             for i, rec in enumerate(self.recommendations, 1):
                 lines.append(f"{i}. {rec}")
             lines.append("")
 
-        lines.extend([
-            "---",
-            f"*Confidence Level: {self.confidence_level}*",
-            f"*Generated at: {self.created_at.isoformat()}*",
-        ])
+        lines.extend(
+            [
+                "---",
+                f"*Confidence Level: {self.confidence_level}*",
+                f"*Generated at: {self.created_at.isoformat()}*",
+            ]
+        )
 
         return "\n".join(lines)

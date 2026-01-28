@@ -12,8 +12,8 @@ from typing import Any
 
 import structlog
 from langchain_classic.agents import AgentExecutor, create_react_agent
-from langchain_core.prompts import PromptTemplate
 from langchain_core.language_models import BaseLanguageModel
+from langchain_core.prompts import PromptTemplate
 from langchain_core.tools import BaseTool
 
 from src.application.services.memory_manager import MemoryManager
@@ -21,7 +21,6 @@ from src.domain.entities.query import ResearchQuery
 from src.domain.entities.report import ReportFormat, ReportSection, ResearchReport
 from src.domain.entities.research import (
     ResearchResult,
-    ResearchStatus,
     SearchResult,
     SourceCredibility,
 )
@@ -30,8 +29,15 @@ logger = structlog.get_logger(__name__)
 
 
 # ReAct Agent Prompt Template
-REACT_PROMPT = """You are an expert technical research agent. Your goal is to conduct 
+REACT_PROMPT = """You are an expert technical research agent. Your goal is to conduct
 thorough research on the given topic and provide accurate, well-sourced information.
+
+CRITICAL LANGUAGE RULE:
+- Detect the language of the question below
+- You MUST respond ENTIRELY in the SAME language as the question
+- If the question is in Spanish, your ENTIRE response must be in Spanish
+- If the question is in English, your ENTIRE response must be in English
+- This applies to ALL parts: thoughts, observations, and final answer
 
 You have access to the following tools:
 
@@ -54,6 +60,7 @@ Important guidelines:
 3. Extract key technical details and best practices
 4. Provide actionable insights when possible
 5. Cite your sources in the final answer
+6. RESPOND IN THE SAME LANGUAGE AS THE QUESTION
 
 Begin!
 
@@ -154,9 +161,7 @@ class ResearchAgentService:
             research_prompt = self._build_research_prompt(query)
 
             # Execute the agent
-            agent_response = await self._agent_executor.ainvoke(
-                {"input": research_prompt}
-            )
+            agent_response = await self._agent_executor.ainvoke({"input": research_prompt})
 
             # Process agent response
             search_results = self._extract_search_results(agent_response)
@@ -224,9 +229,7 @@ class ResearchAgentService:
 
         return "\n".join(prompt_parts)
 
-    def _extract_search_results(
-        self, agent_response: dict[str, Any]
-    ) -> list[SearchResult]:
+    def _extract_search_results(self, agent_response: dict[str, Any]) -> list[SearchResult]:
         """Extract search results from agent intermediate steps."""
         search_results: list[SearchResult] = []
 
@@ -240,52 +243,167 @@ class ResearchAgentService:
                     results = self._parse_search_observation(str(observation))
                     search_results.extend(results)
 
-        return search_results[:10]  # Limit to 10 results
+        # Filter out irrelevant sources
+        filtered_results = self._filter_irrelevant_sources(search_results)
+        return filtered_results[:10]  # Limit to 10 results
+
+    def _filter_irrelevant_sources(self, sources: list[SearchResult]) -> list[SearchResult]:
+        """Filter out irrelevant or low-quality sources."""
+        # Blocked domains - spam, unrelated, or non-research sites
+        blocked_domains = [
+            "zhihu.com",
+            "baidu.com",
+            "weibo.com",
+            "qq.com",
+            "whitepages.com",
+            "yellowpages.com",
+            "facebook.com",
+            "instagram.com",
+            "tiktok.com",
+            "pinterest.com",
+            "linkedin.com/in/",
+            "twitter.com",
+            "x.com",
+        ]
+
+        filtered = []
+        for source in sources:
+            url_lower = source.url.lower()
+
+            # Skip blocked domains
+            if any(blocked in url_lower for blocked in blocked_domains):
+                logger.debug("Filtered blocked domain", url=source.url)
+                continue
+
+            # Skip if title has too many non-latin characters (likely wrong language)
+            if not self._has_valid_latin_text(source.title):
+                logger.debug("Filtered non-latin title", title=source.title[:50])
+                continue
+
+            # Skip if snippet has too many non-latin characters
+            if source.snippet and not self._has_valid_latin_text(source.snippet):
+                logger.debug("Filtered non-latin snippet", url=source.url)
+                continue
+
+            filtered.append(source)
+
+        logger.info(
+            "Filtered sources",
+            original=len(sources),
+            filtered=len(filtered),
+        )
+        return filtered
+
+    def _has_valid_latin_text(self, text: str) -> bool:
+        """Check if text contains mostly Latin/Spanish characters."""
+        if not text or len(text) < 5:
+            return False
+
+        # Count Latin characters (basic + extended for Spanish/Portuguese/French)
+        latin_count = 0
+        for char in text:
+            # Basic ASCII letters
+            if (
+                "A" <= char <= "Z"
+                or "a" <= char <= "z"
+                or "\u00c0" <= char <= "\u00ff"
+                or char in " 0123456789"
+            ):
+                latin_count += 1
+
+        # At least 50% should be Latin/neutral characters
+        ratio = latin_count / len(text)
+        return ratio > 0.5
 
     def _parse_search_observation(self, observation: str) -> list[SearchResult]:
         """Parse search observation string into SearchResult objects."""
         results: list[SearchResult] = []
 
-        # Simple parsing - in production, this would be more sophisticated
-        lines = observation.split("\n")
-        current_title = ""
-        current_url = ""
-        current_snippet = ""
+        # Split by "Result" markers for robust parsing
+        import re
 
-        for line in lines:
-            line = line.strip()
-            if line.startswith("Title:"):
-                if current_title and current_snippet:
-                    results.append(
-                        SearchResult.create(
-                            title=current_title,
-                            url=current_url or "https://example.com",
-                            snippet=current_snippet,
-                            credibility=SourceCredibility.MEDIUM,
-                        )
+        result_blocks = re.split(r"Result \d+:", observation)
+
+        for block in result_blocks:
+            if not block.strip():
+                continue
+
+            lines = block.strip().split("\n")
+            title = ""
+            url = ""
+            snippet = ""
+
+            for line in lines:
+                line = line.strip()
+                if line.startswith("Title:"):
+                    title = line.replace("Title:", "").strip()
+                elif line.startswith("URL:") or line.startswith("Link:"):
+                    # Handle URL: or just the URL after colon
+                    url_part = line.split(":", 1)[-1].strip() if ":" in line else line
+                    # Reconstruct full URL if it was split
+                    if url_part.startswith("//") or url_part.startswith("/"):
+                        url = "https:" + url_part
+                    elif not url_part.startswith("http"):
+                        url = "https://" + url_part
+                    else:
+                        url = url_part
+                elif line.startswith("Snippet:") or line.startswith("Description:"):
+                    snippet = line.split(":", 1)[-1].strip()
+                elif not snippet and title and len(line) > 20:
+                    # Capture any descriptive text as snippet
+                    snippet = line
+
+            if title:
+                results.append(
+                    SearchResult.create(
+                        title=title,
+                        url=url or "https://duckduckgo.com",
+                        snippet=snippet or title,
+                        credibility=self._assess_credibility(url),
                     )
-                current_title = line.replace("Title:", "").strip()
-                current_url = ""
-                current_snippet = ""
-            elif line.startswith("URL:") or line.startswith("Link:"):
-                current_url = line.split(":", 1)[-1].strip()
-            elif line.startswith("Snippet:") or line.startswith("Description:"):
-                current_snippet = line.split(":", 1)[-1].strip()
-            elif current_title and not current_snippet:
-                current_snippet = line
-
-        # Add last result
-        if current_title and current_snippet:
-            results.append(
-                SearchResult.create(
-                    title=current_title,
-                    url=current_url or "https://example.com",
-                    snippet=current_snippet,
-                    credibility=SourceCredibility.MEDIUM,
                 )
-            )
 
+        logger.debug("Parsed search results", count=len(results))
         return results
+
+    def _assess_credibility(self, url: str) -> SourceCredibility:
+        """Assess source credibility based on URL domain."""
+        high_credibility_domains = [
+            "wikipedia.org",
+            "nasa.gov",
+            ".gov",
+            ".edu",
+            "nature.com",
+            "sciencedirect.com",
+            "ieee.org",
+            "microsoft.com",
+            "google.com",
+            "github.com",
+            "stackoverflow.com",
+            "mozilla.org",
+            "python.org",
+        ]
+        medium_credibility_domains = [
+            "medium.com",
+            "dev.to",
+            "bbc.com",
+            "cnn.com",
+            "reuters.com",
+            "techcrunch.com",
+            "wired.com",
+        ]
+
+        url_lower = url.lower()
+
+        for domain in high_credibility_domains:
+            if domain in url_lower:
+                return SourceCredibility.HIGH
+
+        for domain in medium_credibility_domains:
+            if domain in url_lower:
+                return SourceCredibility.MEDIUM
+
+        return SourceCredibility.MEDIUM
 
     def _extract_key_findings(self, agent_response: dict[str, Any]) -> list[str]:
         """Extract key findings from the agent response."""
@@ -301,24 +419,62 @@ class ResearchAgentService:
                 line.startswith("-")
                 or line.startswith("•")
                 or line.startswith("*")
-                or (len(line) > 2 and line[0].isdigit() and line[1] in ".)")
+                or line.startswith("→")
+                or line.startswith("✓")
+                or line.startswith("►")
+                or (len(line) > 2 and line[0].isdigit() and line[1] in ".):-")
             ):
-                finding = line.lstrip("-•*0123456789.) ").strip()
-                if finding and len(finding) > 20:
+                # Remove leading bullet/number characters one by one
+                chars_to_strip = set("-•*→✓►0123456789.):- ")
+                finding = line
+                while finding and finding[0] in chars_to_strip:
+                    finding = finding[1:]
+                finding = finding.strip()
+                if finding and len(finding) > 15:
                     findings.append(finding)
 
         # If no bullet points found, try to extract key sentences
         if not findings:
+            # Split by periods but keep sentence structure
             sentences = output.replace("\n", " ").split(". ")
-            findings = [
-                s.strip() + "."
-                for s in sentences
-                if len(s.strip()) > 50 and any(
-                    kw in s.lower()
-                    for kw in ["important", "key", "best", "recommend", "should", "must"]
-                )
-            ][:5]
+            key_indicators = [
+                "important",
+                "key",
+                "best",
+                "recommend",
+                "should",
+                "must",
+                "first",
+                "principal",
+                "main",
+                "primary",
+                "essential",
+                "importante",
+                "clave",
+                "mejor",
+                "recomienda",
+                "debe",
+                "primero",
+                "principal",
+                "esencial",
+                "fundamental",
+            ]
+            for s in sentences:
+                s = s.strip()
+                if len(s) > 30 and any(kw in s.lower() for kw in key_indicators):
+                    findings.append(s + "." if not s.endswith(".") else s)
+                    if len(findings) >= 5:
+                        break
 
+        # If still no findings, extract first meaningful sentences
+        if not findings and len(output) > 100:
+            sentences = output.replace("\n", " ").split(". ")
+            for s in sentences[:5]:
+                s = s.strip()
+                if len(s) > 40:
+                    findings.append(s + "." if not s.endswith(".") else s)
+
+        logger.debug("Extracted findings", count=len(findings))
         return findings[:10]  # Limit to 10 findings
 
     def _calculate_confidence(
@@ -329,23 +485,21 @@ class ResearchAgentService:
         """Calculate confidence score based on research quality."""
         score = 0.0
 
-        # Source quantity (max 0.3)
-        source_count = len(search_results)
-        score += min(source_count * 0.06, 0.3)
-
-        # Findings quantity (max 0.3)
-        finding_count = len(key_findings)
-        score += min(finding_count * 0.06, 0.3)
-
-        # Source credibility (max 0.2)
-        high_cred_count = sum(
-            1 for r in search_results if r.credibility == SourceCredibility.HIGH
-        )
-        score += min(high_cred_count * 0.05, 0.2)
-
-        # Base score for completing research (0.2)
+        # Base score for completing research (0.3)
         if search_results or key_findings:
-            score += 0.2
+            score += 0.3
+
+        # Source quantity (max 0.35) - more generous scoring
+        source_count = len(search_results)
+        score += min(source_count * 0.07, 0.35)
+
+        # Findings quantity (max 0.25)
+        finding_count = len(key_findings)
+        score += min(finding_count * 0.05, 0.25)
+
+        # Source credibility bonus (max 0.1)
+        high_cred_count = sum(1 for r in search_results if r.credibility == SourceCredibility.HIGH)
+        score += min(high_cred_count * 0.03, 0.1)
 
         return min(score, 1.0)
 
@@ -418,9 +572,7 @@ class ResearchAgentService:
             )
 
         if research.source_count < 3:
-            recommendations.append(
-                "Verify findings with additional authoritative sources"
-            )
+            recommendations.append("Verify findings with additional authoritative sources")
 
         if research.key_findings:
             recommendations.append(

@@ -15,6 +15,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.application.services.memory_manager import MemoryManager
 from src.application.services.research_agent import AgentConfig, ResearchAgentService
+from src.application.services.sqlite_memory import SQLiteMemoryManager
 from src.application.tools.text_analyzer import TextAnalyzerTool
 from src.application.tools.web_search import NewsSearchTool, WebSearchTool
 from src.infrastructure.adapters.groq_adapter import GroqLLMAdapter
@@ -37,8 +38,12 @@ class Settings(BaseSettings):
     api_debug: bool = False
 
     # Agent Configuration
-    agent_max_iterations: int = 10
-    agent_memory_size: int = 20
+    agent_max_iterations: int = 15
+    agent_memory_size: int = 100
+    default_max_sources: int = 8
+
+    # Memory Database
+    memory_db_path: str = "./data/memory.db"
 
     # Logging
     log_level: str = "INFO"
@@ -72,13 +77,20 @@ def get_memory_manager() -> MemoryManager:
     Get or create the memory manager singleton.
 
     Returns:
-        MemoryManager instance
+        SQLiteMemoryManager instance for persistent storage
     """
     global _memory_manager
     if _memory_manager is None:
         settings = get_settings()
-        _memory_manager = MemoryManager(max_entries=settings.agent_memory_size)
-        logger.info("MemoryManager initialized", max_entries=settings.agent_memory_size)
+        _memory_manager = SQLiteMemoryManager(
+            db_path=settings.memory_db_path,
+            max_entries=settings.agent_memory_size,
+        )
+        logger.info(
+            "SQLiteMemoryManager initialized",
+            db_path=settings.memory_db_path,
+            max_entries=settings.agent_memory_size,
+        )
     return _memory_manager
 
 
@@ -96,8 +108,7 @@ def get_llm_adapter(
     """
     if not settings.groq_api_key:
         raise ValueError(
-            "GROQ_API_KEY not set. Get your FREE API key at: "
-            "https://console.groq.com/keys"
+            "GROQ_API_KEY not set. Get your FREE API key at: https://console.groq.com/keys"
         )
 
     return GroqLLMAdapter(

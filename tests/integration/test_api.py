@@ -5,9 +5,10 @@ These tests verify that the API endpoints work correctly
 with mocked dependencies.
 """
 
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock, AsyncMock
 
 from src.infrastructure.api.main import app
 

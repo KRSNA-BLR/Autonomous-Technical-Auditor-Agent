@@ -1,13 +1,20 @@
 import { useState, useCallback } from 'react'
 import { api, ResearchResponse } from '@/lib/api'
 
+type Language = 'auto' | 'es' | 'en'
+
+interface ResearchOptions {
+  language?: Language
+  maxSources?: number
+}
+
 interface UseResearchReturn {
   result: ResearchResponse | null
   isLoading: boolean
   error: string | null
   stage: 'idle' | 'thinking' | 'searching' | 'analyzing' | 'synthesizing'
   progress: number
-  research: (question: string) => Promise<void>
+  research: (question: string, options?: ResearchOptions) => Promise<void>
   reset: () => void
 }
 
@@ -18,7 +25,9 @@ export function useResearch(): UseResearchReturn {
   const [stage, setStage] = useState<'idle' | 'thinking' | 'searching' | 'analyzing' | 'synthesizing'>('idle')
   const [progress, setProgress] = useState(0)
 
-  const research = useCallback(async (question: string) => {
+  const research = useCallback(async (question: string, options: ResearchOptions = {}) => {
+    const { language = 'auto', maxSources = 8 } = options
+    
     setIsLoading(true)
     setError(null)
     setResult(null)
@@ -52,7 +61,7 @@ export function useResearch(): UseResearchReturn {
     }, 300)
 
     try {
-      const response = await api.research({ question })
+      const response = await api.research({ question, language, max_sources: maxSources })
       setResult(response)
       setProgress(100)
       setStage('synthesizing')

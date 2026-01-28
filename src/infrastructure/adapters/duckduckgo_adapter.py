@@ -21,6 +21,86 @@ from src.domain.ports.search_port import (
 logger = structlog.get_logger(__name__)
 
 
+# Language to region mapping for DuckDuckGo
+LANGUAGE_REGION_MAP = {
+    "es": "es-es",  # Spanish (Spain)
+    "es-mx": "es-mx",  # Spanish (Mexico)
+    "es-ar": "es-ar",  # Spanish (Argentina)
+    "en": "us-en",  # English (US)
+    "en-gb": "uk-en",  # English (UK)
+    "pt": "br-pt",  # Portuguese (Brazil)
+    "fr": "fr-fr",  # French
+    "de": "de-de",  # German
+    "auto": "us-en",  # Default to English
+}
+
+
+def detect_language(text: str) -> str:
+    """
+    Detect language from text using simple heuristics.
+
+    Args:
+        text: Text to analyze
+
+    Returns:
+        Language code: 'es' for Spanish, 'en' for English
+    """
+    # Spanish indicators
+    spanish_patterns = [
+        "á",
+        "é",
+        "í",
+        "ó",
+        "ú",
+        "ñ",
+        "¿",
+        "¡",
+        "qué",
+        "cómo",
+        "cuál",
+        "cuáles",
+        "dónde",
+        "quién",
+        "para",
+        "por qué",
+        "porque",
+        "desde",
+        "hacia",
+        "mejor",
+        "mejores",
+        "entre",
+        "sobre",
+        "según",
+    ]
+
+    text_lower = text.lower()
+    spanish_matches = sum(1 for p in spanish_patterns if p in text_lower)
+
+    # If 2+ Spanish indicators found, it's likely Spanish
+    if spanish_matches >= 2:
+        return "es"
+
+    return "en"
+
+
+def get_region_for_language(language: str, query: str = "") -> str:
+    """
+    Get DuckDuckGo region code for a given language.
+
+    Args:
+        language: Language code (es, en, auto)
+        query: Original query for auto-detection
+
+    Returns:
+        Region code for DuckDuckGo
+    """
+    if language == "auto" and query:
+        detected = detect_language(query)
+        return LANGUAGE_REGION_MAP.get(detected, "us-en")
+
+    return LANGUAGE_REGION_MAP.get(language, "us-en")
+
+
 class DuckDuckGoAdapter(SearchPort):
     """
     DuckDuckGo search adapter implementing the Search port.
@@ -78,9 +158,7 @@ class DuckDuckGoAdapter(SearchPort):
                         )
                     )
 
-            results = await asyncio.get_event_loop().run_in_executor(
-                None, do_search
-            )
+            results = await asyncio.get_event_loop().run_in_executor(None, do_search)
 
             search_results = [
                 WebSearchResult(
@@ -103,8 +181,7 @@ class DuckDuckGoAdapter(SearchPort):
 
         except ImportError:
             raise SearchError(
-                "duckduckgo-search package not installed. "
-                "Run: pip install duckduckgo-search"
+                "duckduckgo-search package not installed. Run: pip install duckduckgo-search"
             )
         except Exception as e:
             error_msg = str(e).lower()
@@ -149,9 +226,7 @@ class DuckDuckGoAdapter(SearchPort):
                         )
                     )
 
-            results = await asyncio.get_event_loop().run_in_executor(
-                None, do_news_search
-            )
+            results = await asyncio.get_event_loop().run_in_executor(None, do_news_search)
 
             return [
                 WebSearchResult(

@@ -7,7 +7,7 @@ https://console.groq.com/keys
 """
 
 import json
-from typing import Any
+from typing import Any, ClassVar
 
 import structlog
 from langchain_groq import ChatGroq
@@ -33,7 +33,7 @@ class GroqLLMAdapter(LLMPort):
     """
 
     # Available models on Groq free tier
-    AVAILABLE_MODELS = [
+    AVAILABLE_MODELS: ClassVar[list[str]] = [
         "llama-3.3-70b-versatile",
         "llama-3.1-8b-instant",
         "mixtral-8x7b-32768",
@@ -132,9 +132,7 @@ class GroqLLMAdapter(LLMPort):
                 content=str(response.content),
                 model=self._model,
                 tokens_used=tokens_used,
-                finish_reason=response.response_metadata.get(
-                    "finish_reason", "stop"
-                ),
+                finish_reason=response.response_metadata.get("finish_reason", "stop"),
                 metadata=response.response_metadata or {},
             )
 

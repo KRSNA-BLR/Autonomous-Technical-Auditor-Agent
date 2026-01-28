@@ -5,25 +5,26 @@ These tests verify the business logic in the domain layer,
 ensuring entities behave correctly and maintain invariants.
 """
 
-import pytest
 from datetime import datetime
 from uuid import UUID
 
+import pytest
+
 from src.domain.entities.query import (
-    ResearchQuery,
-    QueryType,
     QueryPriority,
+    QueryType,
+    ResearchQuery,
+)
+from src.domain.entities.report import (
+    ReportFormat,
+    ReportSection,
+    ResearchReport,
 )
 from src.domain.entities.research import (
     ResearchResult,
-    SearchResult,
     ResearchStatus,
+    SearchResult,
     SourceCredibility,
-)
-from src.domain.entities.report import (
-    ResearchReport,
-    ReportSection,
-    ReportFormat,
 )
 
 
@@ -331,9 +332,7 @@ class TestConfidenceLevel:
             (0.2, "Very Low"),
         ],
     )
-    def test_confidence_level_calculation(
-        self, score: float, expected_keyword: str
-    ) -> None:
+    def test_confidence_level_calculation(self, score: float, expected_keyword: str) -> None:
         """Test confidence level calculation for various scores."""
         query = ResearchQuery.create(
             question="What are the best practices for FastAPI?",
