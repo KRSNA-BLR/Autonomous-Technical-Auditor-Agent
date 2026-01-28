@@ -5,18 +5,43 @@ These tests verify that the API endpoints work correctly
 with mocked dependencies.
 """
 
-from unittest.mock import patch
+from collections.abc import Generator
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
+from src.infrastructure.api.dependencies import get_llm_adapter, get_research_agent
 from src.infrastructure.api.main import app
 
 
 @pytest.fixture
-def client() -> TestClient:
-    """Create a test client."""
-    return TestClient(app)
+def mock_llm_adapter() -> MagicMock:
+    """Create a mock LLM adapter."""
+    return MagicMock()
+
+
+@pytest.fixture
+def mock_research_agent() -> MagicMock:
+    """Create a mock research agent."""
+    agent = MagicMock()
+    agent.research = MagicMock(return_value=MagicMock())
+    return agent
+
+
+@pytest.fixture
+def client(
+    mock_llm_adapter: MagicMock, mock_research_agent: MagicMock
+) -> Generator[TestClient, None, None]:
+    """Create a test client with mocked dependencies."""
+    # Override dependencies that require API keys
+    app.dependency_overrides[get_llm_adapter] = lambda: mock_llm_adapter
+    app.dependency_overrides[get_research_agent] = lambda: mock_research_agent
+
+    yield TestClient(app)
+
+    # Clean up overrides
+    app.dependency_overrides.clear()
 
 
 class TestHealthEndpoints:

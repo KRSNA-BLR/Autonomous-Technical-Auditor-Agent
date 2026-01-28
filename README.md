@@ -5,22 +5,48 @@
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![LangChain](https://img.shields.io/badge/LangChain-IA_Agent-121212?style=for-the-badge&logo=chainlink&logoColor=white)](https://langchain.com)
+[![LangChain](https://img.shields.io/badge/LangChain-Agent_IA-121212?style=for-the-badge&logo=chainlink&logoColor=white)](https://langchain.com)
 [![SQLite](https://img.shields.io/badge/SQLite-Memoria-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
 [![License](https://img.shields.io/badge/Licencia-MIT-green?style=for-the-badge)](LICENSE)
-[![Cost](https://img.shields.io/badge/Costo-GRATIS-00C853?style=for-the-badge)](https://console.groq.com)
+[![Costo](https://img.shields.io/badge/Costo-GRATIS-00C853?style=for-the-badge)](https://console.groq.com)
 
-**Un agente de inteligencia artificial que investiga cualquier tema técnico, busca en internet, analiza la información y entrega reportes estructurados en segundos.**
+**Sistema de inteligencia artificial autónomo que investiga cualquier tema técnico, busca en internet, analiza información y genera reportes estructurados en segundos.**
 
-*Desarrollado por **Danilo Viteri***
+<br/>
+
+*Desarrollado por [Danilo Viteri](https://www.linkedin.com/in/danilo-viteri-moreno/)*
+
+<br/>
 
 [🚀 Inicio Rápido](#-inicio-rápido) •
 [📸 Capturas](#-capturas-de-pantalla) •
-[⚙️ Instalación](#-instalación-completa) •
-[📡 API](#-uso-de-la-api) •
-[🏗️ Arquitectura](#-arquitectura-del-sistema)
+[🏛️ Arquitectura](#%EF%B8%8F-arquitectura-del-sistema) •
+[📡 API](#-documentación-de-la-api) •
+[🤝 Contribuir](#-contribuir)
 
 </div>
+
+---
+
+## 📋 Tabla de Contenidos
+
+- [📸 Capturas de Pantalla](#-capturas-de-pantalla)
+- [🎯 ¿Qué es este proyecto?](#-qué-es-este-proyecto)
+- [✨ Características Principales](#-características-principales)
+- [🚀 Inicio Rápido](#-inicio-rápido)
+- [🏛️ Arquitectura del Sistema](#%EF%B8%8F-arquitectura-del-sistema)
+- [🔄 Flujo del Agente ReAct](#-flujo-del-agente-react)
+- [🛠️ Stack Tecnológico](#%EF%B8%8F-stack-tecnológico)
+- [⚙️ Instalación Completa](#%EF%B8%8F-instalación-completa)
+- [🔧 Configuración](#-configuración)
+- [📡 Documentación de la API](#-documentación-de-la-api)
+- [💾 Sistema de Memoria](#-sistema-de-memoria)
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🧪 Tests](#-tests)
+- [🚢 Despliegue](#-despliegue)
+- [🤝 Contribuir](#-contribuir)
+- [📄 Licencia](#-licencia)
+- [📬 Contacto](#-contacto)
 
 ---
 
@@ -51,61 +77,32 @@
 
 ---
 
-## 🎯 ¿Qué es esto?
+## 🎯 ¿Qué es este proyecto?
 
-### Para Todos
+### 📖 Para Usuarios No Técnicos
 
-Imagina tener un **asistente personal inteligente** que puede:
+Imagina tener un **asistente personal inteligente** que puede investigar cualquier tema por ti:
 
-| Paso | Acción |
-|:----:|--------|
-| 1️⃣ | 🔍 **Buscar información** en todo internet sobre cualquier tema |
-| 2️⃣ | 📖 **Leer y analizar** toda la información encontrada |
-| 3️⃣ | 📝 **Resumir y organizar** los puntos más importantes |
-| 4️⃣ | 📊 **Entregar un reporte** claro y estructurado |
+| Paso | Descripción | Icono |
+|:----:|:------------|:-----:|
+| 1 | Escribe tu pregunta en lenguaje natural | 💬 |
+| 2 | El agente busca información en todo internet | 🔍 |
+| 3 | Analiza y procesa toda la información encontrada | 🧠 |
+| 4 | Te entrega un reporte claro y estructurado | 📊 |
 
-**Todo esto en segundos, automáticamente.**
+> **Ejemplo:** Pregunta *"¿Cuáles son las mejores prácticas de Python en 2026?"* y obtén un reporte completo con fuentes verificadas en segundos.
 
-### Para Desarrolladores
+### 💻 Para Desarrolladores
 
-Es un **agente de IA autónomo** construido con el patrón **ReAct** (Reason + Act) que:
+Es un **agente de IA autónomo** construido con el patrón **ReAct** (Reasoning + Acting) que:
 
-- ✅ Recibe una pregunta de investigación
-- ✅ Decide qué herramientas usar (búsqueda web, análisis)
-- ✅ Ejecuta múltiples búsquedas iterativamente
-- ✅ Sintetiza información en respuestas estructuradas
-- ✅ **Mantiene memoria persistente** en SQLite
-
----
-
-## 🚀 Inicio Rápido
-
-### Prerrequisitos
-
-- 🐍 **Python 3.11+**
-- 📦 **Node.js 18+**
-- 🔑 **Cuenta Groq** (gratis) → [console.groq.com](https://console.groq.com/)
-
-### Un Solo Comando
-
-```bash
-# 1. Clonar repositorio
-git clone https://github.com/KRSNA-BLR/Autonomous-Technical-Auditor-Agent.git
-cd Autonomous-Technical-Auditor-Agent
-
-# 2. Configurar API key
-cp .env.example .env
-# Editar .env y agregar tu GROQ_API_KEY
-
-# 3. Instalar dependencias
-pip install -e ".[dev]"
-cd frontend && npm install && cd ..
-
-# 4. ¡Ejecutar todo!
-npm run dev
-```
-
-🌐 Abre **http://localhost:3000** y comienza a investigar.
+- ✅ Implementa **Arquitectura Hexagonal** (Ports & Adapters)
+- ✅ Utiliza **LangChain** para orquestación de agentes
+- ✅ Ejecuta búsquedas iterativas con **DuckDuckGo**
+- ✅ Procesa información con **Llama 3.3 70B** vía Groq
+- ✅ Mantiene **memoria persistente** en SQLite
+- ✅ Expone una **API REST** con FastAPI
+- ✅ Incluye **frontend moderno** con React 19
 
 ---
 
@@ -113,49 +110,50 @@ npm run dev
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
-### 🤖 Agente de IA Autónomo
+### 🤖 Agente IA Autónomo
 - Patrón **ReAct** con LangChain
 - Modelo **Llama 3.3 70B** vía Groq
 - Búsqueda web con **DuckDuckGo**
+- Razonamiento multi-paso inteligente
 
 ### 🎨 Dashboard Moderno
 - **React 19** + **Vite 6** + **Tailwind CSS 4**
-- Animaciones con **Framer Motion**
-- Modo oscuro/claro
-- Diseño responsive
+- Animaciones fluidas con **Framer Motion**
+- Modo oscuro y claro
+- Diseño completamente responsive
 
 </td>
-<td width="50%">
+<td width="50%" valign="top">
 
 ### 🌐 Soporte Multiidioma
 - Selector: **Auto** | **Español** | **Inglés**
 - Detección automática del idioma
-- Resultados localizados
+- Resultados completamente localizados
 
 ### 📊 Control de Fuentes
 - Selector: **3** | **5** | **8** | **10** fuentes
-- Filtrado inteligente
-- Evaluación de credibilidad
+- Filtrado inteligente por relevancia
+- Evaluación de credibilidad automática
 
 </td>
 </tr>
 <tr>
-<td>
+<td valign="top">
 
 ### 📄 Exportación PDF
-- Reportes profesionales
-- Formato limpio
-- Compatible universal
+- Reportes con formato profesional
+- Diseño limpio y estructurado
+- Compatible con cualquier dispositivo
 
 </td>
-<td>
+<td valign="top">
 
 ### 💾 Memoria Persistente
-- Historial en **SQLite**
-- Contexto inteligente
-- Búsqueda en historial
+- Historial guardado en **SQLite**
+- Contexto inteligente entre sesiones
+- Búsqueda en investigaciones previas
 
 </td>
 </tr>
@@ -163,97 +161,230 @@ npm run dev
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 🚀 Inicio Rápido
 
-Este proyecto implementa **Arquitectura Hexagonal** (Ports & Adapters):
+### 📋 Prerrequisitos
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         🌐 CAPA DE PRESENTACIÓN                         │
-│  ┌────────────────────────────────┬────────────────────────────────┐    │
-│  │   React 19 + Vite + Tailwind   │      FastAPI REST API          │    │
-│  │      http://localhost:3000     │    http://localhost:8000       │    │
-│  └────────────────────────────────┴────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         ⚙️ CAPA DE APLICACIÓN                           │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐  │
-│  │ Research Agent  │  │ Memory Manager  │  │   Tools (Search/Analyze)│  │
-│  │ (LangChain)     │  │ (SQLite)        │  │   (DuckDuckGo)          │  │
-│  └─────────────────┘  └─────────────────┘  └─────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                       📦 CAPA DE INFRAESTRUCTURA                        │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐  │
-│  │  Groq Adapter   │  │ DuckDuckGo      │  │   SQLite Database       │  │
-│  │  (LLM API)      │  │ Adapter         │  │   (Persistencia)        │  │
-│  └─────────────────┘  └─────────────────┘  └─────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          🎯 CAPA DE DOMINIO                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐  │
-│  │  Query Entity   │  │ Research Entity │  │   Report Entity         │  │
-│  └─────────────────┘  └─────────────────┘  └─────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
+| Requisito | Versión | Enlace |
+|:----------|:--------|:-------|
+| Python | 3.11+ | [python.org](https://python.org) |
+| Node.js | 18+ | [nodejs.org](https://nodejs.org) |
+| Groq API Key | Gratis | [console.groq.com](https://console.groq.com) |
+
+### ⚡ Instalación en 4 Pasos
+
+```bash
+# 1️⃣ Clonar el repositorio
+git clone https://github.com/KRSNA-BLR/Autonomous-Technical-Auditor-Agent.git
+cd Autonomous-Technical-Auditor-Agent
+
+# 2️⃣ Configurar API key
+cp .env.example .env
+# Editar .env y agregar tu GROQ_API_KEY
+
+# 3️⃣ Instalar dependencias
+pip install -e ".[dev]"
+cd frontend && npm install && cd ..
+
+# 4️⃣ Ejecutar la aplicación
+npm run dev
 ```
 
-### Flujo de Datos
+### 🌐 Acceder a la Aplicación
 
+| Servicio | URL | Descripción |
+|:---------|:----|:------------|
+| Frontend | http://localhost:3000 | Interfaz de usuario |
+| Backend | http://localhost:8000 | API REST |
+| Documentación | http://localhost:8000/docs | Swagger UI |
+
+---
+
+## 🏛️ Arquitectura del Sistema
+
+Este proyecto implementa **Arquitectura Hexagonal** (Ports & Adapters), garantizando separación de responsabilidades, testabilidad y mantenibilidad.
+
+### 📐 Diagrama de Arquitectura
+
+```mermaid
+graph TB
+    subgraph "🌐 Capa de Presentación"
+        UI["🖥️ React 19 + Vite<br/>localhost:3000"]
+        API["⚡ FastAPI REST<br/>localhost:8000"]
+    end
+    
+    subgraph "⚙️ Capa de Aplicación"
+        AGENT["🤖 Research Agent<br/>LangChain ReAct"]
+        MEMORY["🧠 Memory Manager<br/>Gestión de Contexto"]
+        TOOLS["🔧 Tools<br/>Search & Analyze"]
+    end
+    
+    subgraph "📦 Capa de Infraestructura"
+        GROQ["☁️ Groq Adapter<br/>Llama 3.3 70B"]
+        DDG["🔍 DuckDuckGo<br/>Web Search"]
+        DB["💾 SQLite<br/>Persistencia"]
+    end
+    
+    subgraph "🎯 Capa de Dominio"
+        QUERY["📝 Query Entity"]
+        RESEARCH["🔬 Research Entity"]
+        REPORT["📊 Report Entity"]
+    end
+    
+    UI --> API
+    API --> AGENT
+    AGENT --> MEMORY
+    AGENT --> TOOLS
+    TOOLS --> GROQ
+    TOOLS --> DDG
+    MEMORY --> DB
+    AGENT --> QUERY
+    AGENT --> RESEARCH
+    AGENT --> REPORT
+    
+    style UI fill:#61DAFB,color:#000
+    style API fill:#009688,color:#fff
+    style AGENT fill:#FF6B6B,color:#fff
+    style GROQ fill:#7C3AED,color:#fff
+    style DB fill:#003B57,color:#fff
 ```
-┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│ Usuario  │────▶│ Frontend │────▶│   API    │────▶│  Agent   │────▶│ Respuesta│
-│ Pregunta │     │  React   │     │ FastAPI  │     │ LangChain│     │   JSON   │
-└──────────┘     └──────────┘     └──────────┘     └──────────┘     └──────────┘
-                                        │               │
-                                        │               ▼
-                                        │         ┌──────────┐
-                                        │         │   Groq   │
-                                        │         │   LLM    │
-                                        │         └──────────┘
-                                        │               │
-                                        ▼               ▼
-                                  ┌──────────┐   ┌──────────┐
-                                  │  SQLite  │   │DuckDuckGo│
-                                  │ Memoria  │   │ Búsqueda │
-                                  └──────────┘   └──────────┘
+
+### 🏗️ Capas de la Arquitectura
+
+| Capa | Responsabilidad | Componentes |
+|:-----|:----------------|:------------|
+| **Presentación** | Interfaz de usuario y API REST | React, FastAPI |
+| **Aplicación** | Lógica de negocio y orquestación | Agent, Memory, Tools |
+| **Infraestructura** | Adaptadores externos | Groq, DuckDuckGo, SQLite |
+| **Dominio** | Entidades y reglas de negocio | Query, Research, Report |
+
+---
+
+## 🔄 Flujo del Agente ReAct
+
+El agente utiliza el patrón **ReAct** (Reasoning + Acting) para investigar de forma autónoma:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as 👤 Usuario
+    participant F as 🖥️ Frontend
+    participant A as ⚡ API
+    participant AG as 🤖 Agente
+    participant T as 🔧 Tools
+    participant L as 🧠 LLM
+    participant M as 💾 Memoria
+
+    U->>F: Ingresa pregunta
+    F->>A: POST /api/v1/research
+    A->>AG: Iniciar investigación
+    
+    rect rgb(240, 248, 255)
+        Note over AG,L: 🔄 Ciclo ReAct
+        AG->>L: Razonar sobre la pregunta
+        L-->>AG: Decidir acción
+        AG->>T: Ejecutar búsqueda web
+        T-->>AG: Resultados de búsqueda
+        AG->>L: Analizar resultados
+        L-->>AG: Extraer información clave
+        AG->>T: Buscar más contexto
+        T-->>AG: Información adicional
+        AG->>L: Sintetizar hallazgos
+        L-->>AG: Reporte estructurado
+    end
+    
+    AG->>M: Guardar en memoria
+    AG->>A: Retornar resultado
+    A->>F: JSON con reporte
+    F->>U: Mostrar investigación
+```
+
+### 🧠 Proceso de Razonamiento
+
+```mermaid
+flowchart LR
+    subgraph "Entrada"
+        Q["❓ Pregunta<br/>del Usuario"]
+    end
+    
+    subgraph "Ciclo ReAct"
+        T["💭 Thought<br/>Razonamiento"]
+        A["⚡ Action<br/>Ejecutar Tool"]
+        O["👁️ Observation<br/>Analizar Resultado"]
+    end
+    
+    subgraph "Salida"
+        R["📊 Reporte<br/>Final"]
+    end
+    
+    Q --> T
+    T --> A
+    A --> O
+    O --> T
+    O -.->|"Información suficiente"| R
+    
+    style Q fill:#4ECDC4,color:#000
+    style T fill:#FFE66D,color:#000
+    style A fill:#FF6B6B,color:#fff
+    style O fill:#95E1D3,color:#000
+    style R fill:#7C3AED,color:#fff
 ```
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-### Backend
+### 🔧 Backend
+
+```mermaid
+graph LR
+    subgraph "Backend Stack"
+        PY["🐍 Python 3.11+"]
+        FA["⚡ FastAPI"]
+        LC["🔗 LangChain"]
+        GR["☁️ Groq API"]
+        DD["🦆 DuckDuckGo"]
+        SQ["💾 SQLite"]
+        PD["✅ Pydantic v2"]
+    end
+    
+    PY --> FA
+    FA --> LC
+    LC --> GR
+    LC --> DD
+    FA --> SQ
+    FA --> PD
+    
+    style PY fill:#3776AB,color:#fff
+    style FA fill:#009688,color:#fff
+    style LC fill:#121212,color:#fff
+    style GR fill:#7C3AED,color:#fff
+```
 
 | Tecnología | Propósito | Costo |
 |:-----------|:----------|:-----:|
-| **Python 3.11+** | Lenguaje principal | 🆓 |
-| **FastAPI** | Framework web async | 🆓 |
-| **LangChain** | Framework de agentes | 🆓 |
-| **Groq** | LLM API (Llama 3.3 70B) | 🆓 |
-| **DuckDuckGo** | Búsqueda sin API key | 🆓 |
-| **SQLite** | Base de datos memoria | 🆓 |
-| **Pydantic v2** | Validación de datos | 🆓 |
+| **Python 3.11+** | Lenguaje principal | 🆓 Gratis |
+| **FastAPI** | Framework web asíncrono | 🆓 Gratis |
+| **LangChain** | Framework de agentes IA | 🆓 Gratis |
+| **Groq** | LLM API (Llama 3.3 70B) | 🆓 Gratis |
+| **DuckDuckGo** | Búsqueda web sin API key | 🆓 Gratis |
+| **SQLite** | Base de datos para memoria | 🆓 Gratis |
+| **Pydantic v2** | Validación de datos | 🆓 Gratis |
 
-### Frontend
+### 🎨 Frontend
 
 | Tecnología | Propósito | Costo |
 |:-----------|:----------|:-----:|
-| **React 19** | Framework UI | 🆓 |
-| **Vite 6** | Build tool | 🆓 |
-| **Tailwind CSS 4** | Estilos | 🆓 |
-| **Framer Motion** | Animaciones | 🆓 |
-| **jsPDF** | Exportación PDF | 🆓 |
-| **Lucide React** | Iconos | 🆓 |
+| **React 19** | Framework de UI | 🆓 Gratis |
+| **Vite 6** | Build tool ultrarrápido | 🆓 Gratis |
+| **Tailwind CSS 4** | Framework de estilos | 🆓 Gratis |
+| **Framer Motion** | Animaciones fluidas | 🆓 Gratis |
+| **jsPDF** | Generación de PDFs | 🆓 Gratis |
+| **Lucide React** | Iconos modernos | 🆓 Gratis |
 
 <div align="center">
 
-### 💰 Costo Total: **$0**
+### 💰 Costo Total del Proyecto: **$0**
 
 </div>
 
@@ -261,46 +392,47 @@ Este proyecto implementa **Arquitectura Hexagonal** (Ports & Adapters):
 
 ## ⚙️ Instalación Completa
 
-### Opción 1: Desarrollo Local
+### 📌 Opción 1: Desarrollo Local
 
 ```bash
-# Clonar repositorio
+# Clonar el repositorio
 git clone https://github.com/KRSNA-BLR/Autonomous-Technical-Auditor-Agent.git
 cd Autonomous-Technical-Auditor-Agent
 
 # Crear entorno virtual Python
 python -m venv .venv
 
-# Activar entorno
+# Activar entorno virtual
 # Windows:
 .venv\Scripts\activate
 # Mac/Linux:
 source .venv/bin/activate
 
-# Instalar dependencias backend
+# Instalar dependencias del backend
 pip install -e ".[dev]"
 
-# Instalar dependencias frontend
+# Instalar dependencias del frontend
 cd frontend && npm install && cd ..
 
 # Configurar variables de entorno
 cp .env.example .env
-# Editar .env y agregar GROQ_API_KEY
+# Editar .env y agregar tu GROQ_API_KEY
 
 # Ejecutar ambos servidores
 npm run dev
 ```
 
-### Opción 2: Docker
+### 🐳 Opción 2: Docker
 
 ```bash
-# Configurar variables
+# Configurar variables de entorno
 cp .env.example .env
-# Editar .env con GROQ_API_KEY
+# Editar .env con tu GROQ_API_KEY
 
 # Construir y ejecutar
 docker-compose up --build
 
+# Acceder a:
 # Frontend: http://localhost:3000
 # Backend:  http://localhost:8000
 ```
@@ -309,63 +441,71 @@ docker-compose up --build
 
 ## 🔧 Configuración
 
-### Variables de Entorno (.env)
+### 📝 Variables de Entorno (.env)
 
 ```env
-# ═══════════════════════════════════════════════
-# LLM (Groq - Gratis)
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# 🧠 LLM (Groq - Completamente Gratis)
+# ═══════════════════════════════════════════════════════════════
 GROQ_API_KEY=gsk_tu_api_key_aqui
 LLM_MODEL=llama-3.3-70b-versatile
 
-# ═══════════════════════════════════════════════
-# API
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# ⚡ API
+# ═══════════════════════════════════════════════════════════════
 API_HOST=0.0.0.0
 API_PORT=8000
 API_DEBUG=false
 
-# ═══════════════════════════════════════════════
-# Agente
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# 🤖 Agente
+# ═══════════════════════════════════════════════════════════════
 AGENT_MAX_ITERATIONS=15
 AGENT_MEMORY_SIZE=100
 DEFAULT_MAX_SOURCES=8
 
-# ═══════════════════════════════════════════════
-# Base de Datos de Memoria
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# 💾 Base de Datos
+# ═══════════════════════════════════════════════════════════════
 MEMORY_DB_PATH=./data/memory.db
 
-# ═══════════════════════════════════════════════
-# Logs
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# 📋 Logs
+# ═══════════════════════════════════════════════════════════════
 LOG_LEVEL=INFO
 LOG_FORMAT=json
 ```
 
 ### 🔑 Obtener API Key de Groq (Gratis)
 
-1. Ir a [console.groq.com](https://console.groq.com/)
-2. Crear cuenta gratuita
-3. Ir a "API Keys" → "Create API Key"
-4. Copiar la key a tu archivo `.env`
+```mermaid
+flowchart LR
+    A["1️⃣ Visitar<br/>console.groq.com"] --> B["2️⃣ Crear cuenta<br/>gratuita"]
+    B --> C["3️⃣ Ir a<br/>API Keys"]
+    C --> D["4️⃣ Create<br/>API Key"]
+    D --> E["5️⃣ Copiar a<br/>.env"]
+    
+    style A fill:#4ECDC4,color:#000
+    style E fill:#7C3AED,color:#fff
+```
 
 ---
 
-## 📡 Uso de la API
+## 📡 Documentación de la API
 
-### Endpoints Principales
+### 📍 Endpoints Disponibles
 
 | Método | Endpoint | Descripción |
 |:------:|:---------|:------------|
 | `POST` | `/api/v1/research` | Realizar investigación |
-| `GET` | `/api/v1/memory` | Ver historial de memoria |
+| `GET` | `/api/v1/memory` | Obtener historial de memoria |
 | `DELETE` | `/api/v1/memory` | Limpiar memoria |
 | `GET` | `/api/v1/status` | Estado del agente |
+| `GET` | `/health` | Health check |
 | `GET` | `/docs` | Documentación Swagger |
+| `GET` | `/redoc` | Documentación ReDoc |
 
-### Ejemplo de Uso
+### 📤 Ejemplo de Solicitud
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/research" \
@@ -377,7 +517,7 @@ curl -X POST "http://localhost:8000/api/v1/research" \
   }'
 ```
 
-### Respuesta
+### 📥 Ejemplo de Respuesta
 
 ```json
 {
@@ -387,13 +527,14 @@ curl -X POST "http://localhost:8000/api/v1/research" \
   "key_findings": [
     "Usar type hints en todo el código",
     "Preferir f-strings sobre format()",
-    "Implementar async/await para I/O"
+    "Implementar async/await para operaciones I/O"
   ],
   "sources": [
     {
       "title": "Python Best Practices 2026",
-      "url": "https://...",
-      "snippet": "..."
+      "url": "https://example.com/article",
+      "snippet": "Fragmento relevante del artículo...",
+      "credibility": "high"
     }
   ],
   "confidence_score": 0.85,
@@ -403,35 +544,34 @@ curl -X POST "http://localhost:8000/api/v1/research" \
 
 ---
 
-## 💾 Memoria Persistente (SQLite)
+## 💾 Sistema de Memoria
 
-El agente utiliza **SQLite** para almacenar el historial de investigaciones:
+El agente utiliza **SQLite** para mantener memoria persistente entre sesiones:
 
-### Características
+```mermaid
+erDiagram
+    MEMORY_ENTRIES {
+        int id PK "Identificador único"
+        text query "Pregunta del usuario"
+        text response "Respuesta del agente"
+        text timestamp "Fecha y hora"
+        text metadata "Metadatos JSON"
+    }
+```
+
+### 🎯 Características de la Memoria
 
 | Característica | Descripción |
 |:---------------|:------------|
-| 🔄 **Persistencia** | Los datos sobreviven reinicios |
-| 🧠 **Contexto inteligente** | Usa investigaciones previas |
-| 🔍 **Búsqueda** | Buscar por palabras clave |
-| 🧹 **Auto-limpieza** | Mantiene últimas 100 entradas |
+| 🔄 **Persistencia** | Los datos sobreviven reinicios del servidor |
+| 🧠 **Contexto Inteligente** | Usa investigaciones previas para mejorar respuestas |
+| 🔍 **Búsqueda** | Buscar por palabras clave en el historial |
+| 🧹 **Auto-limpieza** | Mantiene automáticamente las últimas 100 entradas |
 
-### Ubicación
+### 📂 Ubicación de la Base de Datos
 
 ```
 ./data/memory.db
-```
-
-### Esquema
-
-```sql
-CREATE TABLE memory_entries (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    query TEXT NOT NULL,
-    response TEXT NOT NULL,
-    timestamp TEXT NOT NULL,
-    metadata TEXT DEFAULT '{}'
-);
 ```
 
 ---
@@ -441,36 +581,59 @@ CREATE TABLE memory_entries (
 ```
 autonomous-tech-research-agent/
 │
-├── 📂 src/                           # Backend Python
-│   ├── 📂 domain/                    # Entidades y reglas de negocio
-│   │   ├── entities/                 # Query, Research, Report
-│   │   └── ports/                    # Interfaces (contratos)
+├── 📂 src/                              # Backend Python
+│   ├── 📂 domain/                       # 🎯 Capa de Dominio
+│   │   ├── 📂 entities/                 # Entidades del negocio
+│   │   │   ├── query.py                 # Entidad de consulta
+│   │   │   ├── research.py              # Entidad de investigación
+│   │   │   └── report.py                # Entidad de reporte
+│   │   └── 📂 ports/                    # Interfaces (contratos)
+│   │       ├── llm_port.py              # Puerto para LLM
+│   │       └── search_port.py           # Puerto para búsqueda
 │   │
-│   ├── 📂 application/               # Lógica de aplicación
-│   │   ├── services/                 # Agente, Memoria
-│   │   └── tools/                    # Herramientas del agente
+│   ├── 📂 application/                  # ⚙️ Capa de Aplicación
+│   │   ├── 📂 services/                 # Servicios de negocio
+│   │   │   ├── research_agent.py        # Agente principal
+│   │   │   ├── memory_manager.py        # Gestor de memoria
+│   │   │   └── sqlite_memory.py         # Implementación SQLite
+│   │   └── 📂 tools/                    # Herramientas del agente
+│   │       ├── web_search.py            # Tool de búsqueda web
+│   │       └── text_analyzer.py         # Tool de análisis
 │   │
-│   └── 📂 infrastructure/            # Adaptadores externos
-│       ├── api/                      # FastAPI endpoints
-│       └── adapters/                 # Groq, DuckDuckGo
+│   └── 📂 infrastructure/               # 📦 Capa de Infraestructura
+│       ├── 📂 api/                      # API REST
+│       │   ├── main.py                  # Aplicación FastAPI
+│       │   ├── dependencies.py          # Inyección de dependencias
+│       │   ├── 📂 routes/               # Endpoints
+│       │   └── 📂 schemas/              # Esquemas Pydantic
+│       └── 📂 adapters/                 # Adaptadores externos
+│           ├── groq_adapter.py          # Adaptador Groq LLM
+│           └── duckduckgo_adapter.py    # Adaptador DuckDuckGo
 │
-├── 📂 frontend/                      # Frontend React
+├── 📂 frontend/                         # Frontend React
 │   ├── 📂 src/
-│   │   ├── components/               # Componentes UI
-│   │   ├── hooks/                    # Custom hooks
-│   │   └── lib/                      # API client, utils
-│   └── package.json
+│   │   ├── App.tsx                      # Componente principal
+│   │   ├── 📂 components/               # Componentes UI
+│   │   ├── 📂 hooks/                    # Custom hooks
+│   │   └── 📂 lib/                      # API client y utilidades
+│   ├── package.json                     # Dependencias npm
+│   └── vite.config.ts                   # Configuración Vite
 │
-├── 📂 docs/                          # Documentación
-│   └── images/                       # Screenshots
+├── 📂 docs/                             # Documentación
+│   └── 📂 images/                       # Screenshots
 │
-├── 📂 data/                          # Base de datos (gitignored)
-│   └── memory.db                     # SQLite memoria
+├── 📂 data/                             # Base de datos (gitignored)
+│   └── memory.db                        # SQLite de memoria
 │
-├── 📂 tests/                         # Tests
-├── docker-compose.yml                # Docker setup
-├── package.json                      # Scripts npm
-└── pyproject.toml                    # Dependencias Python
+├── 📂 tests/                            # Tests
+│   ├── 📂 unit/                         # Tests unitarios
+│   └── 📂 integration/                  # Tests de integración
+│
+├── docker-compose.yml                   # Configuración Docker
+├── Dockerfile                           # Imagen Docker backend
+├── pyproject.toml                       # Dependencias Python
+├── package.json                         # Scripts npm principales
+└── README.md                            # Este archivo
 ```
 
 ---
@@ -481,7 +644,7 @@ autonomous-tech-research-agent/
 # Ejecutar todos los tests
 pytest tests/ -v
 
-# Con cobertura
+# Ejecutar con cobertura de código
 pytest tests/ -v --cov=src --cov-report=html
 
 # Solo tests unitarios
@@ -489,65 +652,126 @@ pytest tests/unit/ -v
 
 # Solo tests de integración
 pytest tests/integration/ -v
+
+# Tests con salida detallada
+pytest tests/ -v --tb=short
 ```
 
 ---
 
-## 🚀 Despliegue
+## 🚢 Despliegue
 
-### Docker (Recomendado)
+### 🐳 Docker (Recomendado)
 
 ```bash
+# Construir y ejecutar
 docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener
+docker-compose down
 ```
 
-### Render.com (Gratis)
+### ☁️ Plataformas Cloud (Gratis)
 
-1. Conectar repositorio GitHub
-2. Configurar variables de entorno
-3. Deploy automático en cada push
-
-### Railway (Gratis)
-
-```bash
-railway login
-railway init
-railway up
-```
+| Plataforma | Tier Gratuito | Comando |
+|:-----------|:--------------|:--------|
+| **Render** | Sí | Conectar repo GitHub |
+| **Railway** | Sí | `railway up` |
+| **Fly.io** | Sí | `fly deploy` |
 
 ---
 
 ## 🤝 Contribuir
 
-¡Las contribuciones son bienvenidas!
+¡Las contribuciones son bienvenidas y apreciadas!
 
-1. Fork del repositorio
-2. Crear rama (`git checkout -b feature/nueva-caracteristica`)
-3. Commit (`git commit -m 'Agregar nueva característica'`)
-4. Push (`git push origin feature/nueva-caracteristica`)
-5. Abrir Pull Request
+### 📋 Pasos para Contribuir
+
+```mermaid
+flowchart LR
+    A["1️⃣ Fork"] --> B["2️⃣ Crear Branch"]
+    B --> C["3️⃣ Commit"]
+    C --> D["4️⃣ Push"]
+    D --> E["5️⃣ Pull Request"]
+    
+    style A fill:#4ECDC4,color:#000
+    style E fill:#7C3AED,color:#fff
+```
+
+```bash
+# 1. Fork del repositorio en GitHub
+
+# 2. Clonar tu fork
+git clone https://github.com/TU-USUARIO/Autonomous-Technical-Auditor-Agent.git
+
+# 3. Crear rama para tu feature
+git checkout -b feature/mi-nueva-caracteristica
+
+# 4. Hacer cambios y commit
+git commit -m "✨ Agregar nueva característica"
+
+# 5. Push a tu fork
+git push origin feature/mi-nueva-caracteristica
+
+# 6. Abrir Pull Request en GitHub
+```
+
+### 📏 Guías de Estilo
+
+- ✅ Usar **type hints** en todo el código Python
+- ✅ Seguir **PEP 8** para formato de código
+- ✅ Escribir **docstrings** para funciones públicas
+- ✅ Agregar **tests** para nuevas funcionalidades
+- ✅ Mantener mensajes de commit descriptivos
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la **Licencia MIT**. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+```
+MIT License
+
+Copyright (c) 2026 Danilo Viteri
+
+Se concede permiso, de forma gratuita, a cualquier persona que obtenga una copia
+de este software y los archivos de documentación asociados, para utilizar el
+Software sin restricción, incluyendo sin limitación los derechos de usar, copiar,
+modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias del
+Software.
+```
 
 ---
 
 ## 📬 Contacto
 
-**Danilo Viteri**
+<div align="center">
 
-- 💼 LinkedIn: [linkedin.com/in/danilo-viteri](https://linkedin.com/in/danilo-viteri)
-- 🐙 GitHub: [github.com/daniloviteri](https://github.com/daniloviteri)
+### 👨‍💻 Danilo Viteri
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Danilo_Viteri-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/danilo-viteri-moreno/)
+[![GitHub](https://img.shields.io/badge/GitHub-KRSNA--BLR-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/KRSNA-BLR)
+
+</div>
 
 ---
 
 <div align="center">
 
-### ⭐ Si este proyecto te fue útil, considera darle una estrella en GitHub ⭐
+### ⭐ Si este proyecto te resultó útil, considera darle una estrella en GitHub ⭐
 
-*Desarrollado con ❤️ por Danilo Viteri*
+<br/>
+
+*Desarrollado con ❤️ por [Danilo Viteri](https://www.linkedin.com/in/danilo-viteri-moreno/)*
+
+<br/>
+
+[![Made with Python](https://img.shields.io/badge/Made%20with-Python-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Powered by LangChain](https://img.shields.io/badge/Powered%20by-LangChain-121212?style=flat-square&logo=chainlink&logoColor=white)](https://langchain.com)
+[![Built with React](https://img.shields.io/badge/Built%20with-React-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
 
 </div>
