@@ -17,8 +17,6 @@ import structlog
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from src.domain.ports.llm_port import (
-    LLMConnectionError,
-    LLMError,
     LLMPort,
     LLMRateLimitError,
     LLMResponse,
@@ -34,7 +32,7 @@ class GeminiLLMAdapter(LLMPort):
 
     Uses Gemini's free tier with generous rate limits.
     Includes automatic retry with exponential backoff for rate limit errors.
-    
+
     Recommended models for free tier:
     - gemini-2.0-flash: 1500 requests/day (RECOMMENDED)
     - gemini-2.5-flash: Only 20 requests/day (LIMITED!)
@@ -42,13 +40,13 @@ class GeminiLLMAdapter(LLMPort):
 
     # Available models on Gemini free tier (ordered by free tier limits)
     AVAILABLE_MODELS: ClassVar[list[str]] = [
-        "gemini-2.0-flash",      # 1500 req/day - RECOMMENDED
-        "gemini-2.0-flash-lite", # 1500 req/day
-        "gemini-1.5-flash",      # 1500 req/day
-        "gemini-2.5-flash",      # 20 req/day - LIMITED!
-        "gemini-2.5-pro",        # Limited
+        "gemini-2.0-flash",  # 1500 req/day - RECOMMENDED
+        "gemini-2.0-flash-lite",  # 1500 req/day
+        "gemini-1.5-flash",  # 1500 req/day
+        "gemini-2.5-flash",  # 20 req/day - LIMITED!
+        "gemini-2.5-pro",  # Limited
     ]
-    
+
     # Retry configuration
     MAX_RETRIES: ClassVar[int] = 3
     BASE_DELAY: ClassVar[float] = 2.0  # seconds
@@ -104,52 +102,57 @@ class GeminiLLMAdapter(LLMPort):
     async def _execute_with_retry(
         self,
         operation: str,
-        coro_func,
-        *args,
-        **kwargs,
-    ):
+        coro_func: Any,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
         """
         Execute an async operation with exponential backoff retry.
-        
+
         Args:
             operation: Name of the operation for logging
             coro_func: Async function to execute
             *args, **kwargs: Arguments to pass to the function
-            
+
         Returns:
             Result of the operation
-            
+
         Raises:
             LLMRateLimitError: If all retries exhausted
         """
         last_error = None
-        
+
         for attempt in range(self._max_retries + 1):
             try:
                 return await coro_func(*args, **kwargs)
-                
+
             except Exception as e:
                 error_msg = str(e).lower()
-                
+
                 # Check if it's a rate limit error
-                is_rate_limit = any(x in error_msg for x in [
-                    "rate limit", "quota", "429", "too many requests",
-                    "resource_exhausted"
-                ])
-                
+                is_rate_limit = any(
+                    x in error_msg
+                    for x in [
+                        "rate limit",
+                        "quota",
+                        "429",
+                        "too many requests",
+                        "resource_exhausted",
+                    ]
+                )
+
                 if not is_rate_limit:
                     # Not a rate limit error, don't retry
                     raise
-                
+
                 last_error = e
-                
+
                 if attempt < self._max_retries:
                     # Calculate delay with exponential backoff + jitter
                     delay = min(
-                        self.BASE_DELAY * (2 ** attempt) + random.uniform(0, 1),
-                        self.MAX_DELAY
+                        self.BASE_DELAY * (2**attempt) + random.uniform(0, 1), self.MAX_DELAY
                     )
-                    
+
                     logger.warning(
                         f"Rate limit hit, retrying {operation}",
                         attempt=attempt + 1,
@@ -157,7 +160,7 @@ class GeminiLLMAdapter(LLMPort):
                         delay_seconds=round(delay, 2),
                         error=str(e)[:100],
                     )
-                    
+
                     await asyncio.sleep(delay)
                 else:
                     logger.error(
@@ -165,10 +168,9 @@ class GeminiLLMAdapter(LLMPort):
                         attempts=self._max_retries + 1,
                         error=str(e),
                     )
-        
+
         raise LLMRateLimitError(
-            f"Rate limit exceeded after {self._max_retries + 1} attempts: {last_error}",
-            last_error
+            f"Rate limit exceeded after {self._max_retries + 1} attempts: {last_error}", last_error
         )
 
     async def generate(
@@ -190,7 +192,7 @@ class GeminiLLMAdapter(LLMPort):
         Returns:
             LLMResponse with generated content
         """
-        return await self._execute_with_retry(
+        result: LLMResponse = await self._execute_with_retry(
             "generate",
             self._generate_internal,
             prompt,
@@ -198,6 +200,7 @@ class GeminiLLMAdapter(LLMPort):
             temperature,
             max_tokens,
         )
+        return result
 
     async def _generate_internal(
         self,
@@ -247,7 +250,9 @@ class GeminiLLMAdapter(LLMPort):
             content=str(content),
             model=self._model,
             tokens_used=tokens_used,
-            finish_reason=response.response_metadata.get("finish_reason", "STOP") if hasattr(response, "response_metadata") else "STOP",
+            finish_reason=response.response_metadata.get("finish_reason", "STOP")
+            if hasattr(response, "response_metadata")
+            else "STOP",
             metadata=response.response_metadata if hasattr(response, "response_metadata") else {},
         )
 

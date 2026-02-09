@@ -112,7 +112,7 @@ def get_llm_adapter(
 ) -> LLMPort:
     """
     Get the LLM adapter instance.
-    
+
     Priority:
     1. Groq (if GROQ_API_KEY configured) - reliable, fast
     2. Gemini (if GOOGLE_API_KEY configured) - fallback
@@ -122,12 +122,12 @@ def get_llm_adapter(
 
     Returns:
         Configured LLM adapter
-        
+
     Raises:
         ValueError: If no API key is configured
     """
     global _llm_adapter
-    
+
     if _llm_adapter is None:
         # Priority 1: Use Groq if configured (more reliable)
         if settings.groq_api_key:
@@ -143,13 +143,14 @@ def get_llm_adapter(
         # Priority 2: Use Gemini as fallback
         elif settings.google_api_key:
             from src.infrastructure.adapters.gemini_adapter import GeminiLLMAdapter
+
             _llm_adapter = GeminiLLMAdapter(
                 api_key=settings.google_api_key,
                 model=settings.gemini_model,
             )
             logger.info(
                 "LLM adapter created",
-                provider="gemini", 
+                provider="gemini",
                 model=settings.gemini_model,
             )
         else:
@@ -157,12 +158,12 @@ def get_llm_adapter(
                 "No LLM API key configured. Set GROQ_API_KEY or GOOGLE_API_KEY. "
                 "Get free keys at: https://console.groq.com/keys or https://aistudio.google.com"
             )
-    
+
     return _llm_adapter
 
 
 def get_tools(
-    settings: Annotated[Settings, Depends(get_settings)],
+    settings: Annotated[Settings, Depends(get_settings)],  # noqa: ARG001
     llm_adapter: Annotated[LLMPort, Depends(get_llm_adapter)],
 ) -> list[BaseTool]:
     """

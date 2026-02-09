@@ -5,9 +5,9 @@ from src.infrastructure.adapters.llm_factory import FallbackLLMAdapter, LLMFacto
 
 __all__ = [
     "DuckDuckGoAdapter",
+    "FallbackLLMAdapter",
     "GeminiLLMAdapter",
     "GroqLLMAdapter",
     "LLMFactory",
     "LLMProvider",
-    "FallbackLLMAdapter",
 ]

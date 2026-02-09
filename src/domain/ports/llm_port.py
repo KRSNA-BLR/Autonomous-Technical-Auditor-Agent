@@ -9,6 +9,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+from langchain_core.language_models import BaseChatModel
+
 
 @dataclass(frozen=True, slots=True)
 class LLMResponse:
@@ -45,12 +47,22 @@ class LLMPort(ABC):
     """
 
     @abstractmethod
+    def get_langchain_llm(self) -> BaseChatModel:
+        """
+        Get the underlying LangChain LLM instance for use with agents.
+
+        Returns:
+            Configured BaseChatModel instance
+        """
+        ...
+
+    @abstractmethod
     async def generate(
         self,
         prompt: str,
         system_prompt: str | None = None,
-        temperature: float = 0.7,
-        max_tokens: int = 2000,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> LLMResponse:
         """
         Generate text completion from the LLM.

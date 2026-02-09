@@ -5,7 +5,7 @@ This tool provides text analysis capabilities including summarization,
 key point extraction, and sentiment analysis using the LLM.
 """
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import structlog
@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 logger = structlog.get_logger(__name__)
 
 
-class AnalysisType(str, Enum):
+class AnalysisType(StrEnum):
     """Types of text analysis available."""
 
     SUMMARIZE = "summarize"

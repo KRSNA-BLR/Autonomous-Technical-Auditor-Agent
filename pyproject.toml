@@ -5,7 +5,7 @@ description = "🔬 An autonomous AI agent that conducts technical research usin
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
-authors = [{ name = "Your Name", email = "your.email@example.com" }]
+authors = [{ name = "Danilo Viteri Moreno", email = "dannyviterimoreno@gmail.com" }]
 keywords = [
     "ai-agent",
     "langchain",
@@ -50,10 +50,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/autonomous-tech-research-agent"
-Documentation = "https://github.com/yourusername/autonomous-tech-research-agent#readme"
-Repository = "https://github.com/yourusername/autonomous-tech-research-agent"
-Issues = "https://github.com/yourusername/autonomous-tech-research-agent/issues"
+Homepage = "https://github.com/KRSNA-BLR/Autonomous-Technical-Auditor-Agent"
+Documentation = "https://github.com/KRSNA-BLR/Autonomous-Technical-Auditor-Agent#readme"
+Repository = "https://github.com/KRSNA-BLR/Autonomous-Technical-Auditor-Agent"
+Issues = "https://github.com/KRSNA-BLR/Autonomous-Technical-Auditor-Agent/issues"
 
 [build-system]
 requires = ["hatchling"]
@@ -113,9 +113,13 @@ pretty = true
 [[tool.mypy.overrides]]
 module = [
     "langchain.*",
+    "langchain_core.*",
     "langchain_groq.*",
+    "langchain_google_genai.*",
     "langchain_community.*",
     "duckduckgo_search.*",
+    "ddgs",
+    "ddgs.*",
 ]
 ignore_missing_imports = true
 

@@ -7,11 +7,11 @@ following the principle of making invalid states unrepresentable.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 
-class QueryType(str, Enum):
+class QueryType(StrEnum):
     """Types of research queries the agent can handle."""
 
     TECHNICAL = "technical"
@@ -20,7 +20,7 @@ class QueryType(str, Enum):
     DEEP_DIVE = "deep_dive"
 
 
-class QueryPriority(str, Enum):
+class QueryPriority(StrEnum):
     """Priority levels for research queries."""
 
     LOW = "low"

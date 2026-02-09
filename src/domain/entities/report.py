@@ -7,14 +7,14 @@ with proper formatting and organization of findings.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from src.domain.entities.research import ResearchResult
 
 
-class ReportFormat(str, Enum):
+class ReportFormat(StrEnum):
     """Available report formats."""
 
     JSON = "json"

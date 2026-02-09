@@ -42,10 +42,10 @@ RUN pip install --upgrade pip && \
 FROM python:3.11-slim AS production
 
 # Labels for container metadata
-LABEL maintainer="Your Name <your.email@example.com>" \
+LABEL maintainer="Danilo Viteri Moreno <dannyviterimoreno@gmail.com>" \
     version="1.0.0" \
     description="Autonomous Tech Research Agent - AI-powered research automation" \
-    org.opencontainers.image.source="https://github.com/yourusername/autonomous-tech-research-agent"
+    org.opencontainers.image.source="https://github.com/KRSNA-BLR/Autonomous-Technical-Auditor-Agent"
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

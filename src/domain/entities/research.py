@@ -7,12 +7,12 @@ including individual search results and aggregated findings.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 
-class SourceCredibility(str, Enum):
+class SourceCredibility(StrEnum):
     """Credibility levels for research sources."""
 
     HIGH = "high"
@@ -21,7 +21,7 @@ class SourceCredibility(str, Enum):
     UNKNOWN = "unknown"
 
 
-class ResearchStatus(str, Enum):
+class ResearchStatus(StrEnum):
     """Status of the research process."""
 
     PENDING = "pending"
