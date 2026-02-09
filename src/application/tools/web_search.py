@@ -1,9 +1,14 @@
 """
 Web Search Tool - LangChain tool for web search operations.
 
-This tool wraps the search port to provide web search capabilities
-to the research agent using DuckDuckGo (free, no API key required).
+This tool wraps the DDGS metasearch library to provide web search capabilities
+to the research agent. DDGS aggregates results from multiple engines
+(Bing, Brave, Google, DuckDuckGo, etc.) - free, no API key required.
+
+Library: https://pypi.org/project/ddgs/
 """
+
+import asyncio
 
 import structlog
 from langchain_core.tools import BaseTool
@@ -28,7 +33,9 @@ class WebSearchTool(BaseTool):
     """
     LangChain tool for performing web searches.
 
-    Uses DuckDuckGo as the search backend (free, no API key required).
+    Uses DDGS (Dux Distributed Global Search) as the search backend.
+    Aggregates results from Bing, Brave, Google, DuckDuckGo, and more.
+    Free, no API key required.
     """
 
     name: str = "web_search"
@@ -52,18 +59,18 @@ class WebSearchTool(BaseTool):
             Formatted search results string
         """
         try:
-            # Use new ddgs package (recommended replacement for duckduckgo-search)
-            try:
-                from ddgs import DDGS
-            except ImportError:
-                from duckduckgo_search import DDGS
+            from ddgs import DDGS
 
             logger.info("Executing web search", query=query, max_results=max_results)
 
-            results = []
             ddgs = DDGS()
-            search_results = list(ddgs.text(query, max_results=max_results))
+            search_results = ddgs.text(
+                query,
+                max_results=max_results,
+                region="us-en",
+            )
 
+            results = []
             for i, result in enumerate(search_results, 1):
                 results.append(
                     f"Result {i}:\n"
@@ -79,8 +86,8 @@ class WebSearchTool(BaseTool):
             return "\n".join(results)
 
         except ImportError:
-            logger.error("ddgs/duckduckgo-search not installed")
-            return "Error: Search functionality not available. Please install ddgs."
+            logger.error("ddgs not installed, run: pip install ddgs")
+            return "Error: Search functionality not available. Install ddgs: pip install ddgs"
         except Exception as e:
             logger.error("Search failed", error=str(e))
             return f"Error performing search: {e!s}"
@@ -96,9 +103,6 @@ class WebSearchTool(BaseTool):
         Returns:
             Formatted search results string
         """
-        # DuckDuckGo search is synchronous, run in executor
-        import asyncio
-
         return await asyncio.get_event_loop().run_in_executor(None, self._run, query, max_results)
 
 
@@ -106,7 +110,8 @@ class NewsSearchTool(BaseTool):
     """
     LangChain tool for searching news articles.
 
-    Uses DuckDuckGo News search for recent news and developments.
+    Uses DDGS News search for recent news and developments.
+    Aggregates from Bing, DuckDuckGo, Yahoo news backends.
     """
 
     name: str = "news_search"
@@ -121,18 +126,18 @@ class NewsSearchTool(BaseTool):
     def _run(self, query: str, max_results: int = 5) -> str:
         """Execute a synchronous news search."""
         try:
-            # Use new ddgs package (recommended replacement for duckduckgo-search)
-            try:
-                from ddgs import DDGS
-            except ImportError:
-                from duckduckgo_search import DDGS
+            from ddgs import DDGS
 
             logger.info("Executing news search", query=query)
 
-            results = []
             ddgs = DDGS()
-            news_results = list(ddgs.news(query, max_results=max_results))
+            news_results = ddgs.news(
+                query,
+                max_results=max_results,
+                region="us-en",
+            )
 
+            results = []
             for i, result in enumerate(news_results, 1):
                 results.append(
                     f"News {i}:\n"
@@ -154,6 +159,4 @@ class NewsSearchTool(BaseTool):
 
     async def _arun(self, query: str, max_results: int = 5) -> str:
         """Execute an asynchronous news search."""
-        import asyncio
-
         return await asyncio.get_event_loop().run_in_executor(None, self._run, query, max_results)

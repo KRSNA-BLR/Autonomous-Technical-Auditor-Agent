@@ -203,10 +203,17 @@ class FallbackLLMAdapter(LLMPort):
         logger.info("FallbackLLMAdapter initialized")
 
     def get_langchain_llm(self) -> BaseChatModel:
-        """Get the LangChain LLM instance."""
-        if self._using_fallback:
-            return self._fallback.get_langchain_llm()
-        return self._primary.get_langchain_llm()
+        """
+        Get a LangChain LLM with automatic fallback.
+
+        Uses LangChain's native with_fallbacks() so the AgentExecutor
+        automatically retries with the fallback LLM on any error.
+        """
+        primary_llm = self._primary.get_langchain_llm()
+        fallback_llm = self._fallback.get_langchain_llm()
+        # with_fallbacks returns RunnableWithFallbacks which is Runnable-compatible
+        # and works correctly with create_react_agent / AgentExecutor
+        return primary_llm.with_fallbacks([fallback_llm])  # type: ignore[return-value]
 
     async def generate(
         self,

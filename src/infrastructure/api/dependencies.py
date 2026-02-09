@@ -19,7 +19,7 @@ from src.application.services.sqlite_memory import SQLiteMemoryManager
 from src.application.tools.text_analyzer import TextAnalyzerTool
 from src.application.tools.web_search import NewsSearchTool, WebSearchTool
 from src.domain.ports.llm_port import LLMPort
-from src.infrastructure.adapters.groq_adapter import GroqLLMAdapter
+from src.infrastructure.adapters.llm_factory import LLMFactory
 
 logger = structlog.get_logger(__name__)
 
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     # Google Gemini Configuration (FREE at aistudio.google.com)
     google_api_key: str = ""
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-2.0-flash"
 
     # Groq Configuration (FREE API key from console.groq.com)
     groq_api_key: str = ""
@@ -48,6 +48,7 @@ class Settings(BaseSettings):
 
     # Agent Configuration
     agent_max_iterations: int = 15
+    agent_max_execution_time: int = 180
     agent_memory_size: int = 100
     default_max_sources: int = 8
 
@@ -111,11 +112,10 @@ def get_llm_adapter(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> LLMPort:
     """
-    Get the LLM adapter instance.
+    Get the LLM adapter instance using the LLMFactory.
 
-    Priority:
-    1. Groq (if GROQ_API_KEY configured) - reliable, fast
-    2. Gemini (if GOOGLE_API_KEY configured) - fallback
+    Uses the LLM_PROVIDER setting to determine which provider(s) to use.
+    In AUTO mode, creates a primary (Gemini) + fallback (Groq) adapter.
 
     Args:
         settings: Application settings
@@ -129,35 +129,18 @@ def get_llm_adapter(
     global _llm_adapter
 
     if _llm_adapter is None:
-        # Priority 1: Use Groq if configured (more reliable)
-        if settings.groq_api_key:
-            _llm_adapter = GroqLLMAdapter(
-                api_key=settings.groq_api_key,
-                model=settings.groq_model or settings.llm_model,
-            )
-            logger.info(
-                "LLM adapter created",
-                provider="groq",
-                model=settings.groq_model or settings.llm_model,
-            )
-        # Priority 2: Use Gemini as fallback
-        elif settings.google_api_key:
-            from src.infrastructure.adapters.gemini_adapter import GeminiLLMAdapter
-
-            _llm_adapter = GeminiLLMAdapter(
-                api_key=settings.google_api_key,
-                model=settings.gemini_model,
-            )
-            logger.info(
-                "LLM adapter created",
-                provider="gemini",
-                model=settings.gemini_model,
-            )
-        else:
-            raise ValueError(
-                "No LLM API key configured. Set GROQ_API_KEY or GOOGLE_API_KEY. "
-                "Get free keys at: https://console.groq.com/keys or https://aistudio.google.com"
-            )
+        factory = LLMFactory(
+            provider=settings.llm_provider,
+            google_api_key=settings.google_api_key or None,
+            gemini_model=settings.gemini_model,
+            groq_api_key=settings.groq_api_key or None,
+            groq_model=settings.groq_model or settings.llm_model,
+        )
+        _llm_adapter = factory.create_adapter()
+        logger.info(
+            "LLM adapter created via factory",
+            provider=settings.llm_provider,
+        )
 
     return _llm_adapter
 
@@ -209,6 +192,7 @@ def get_research_agent(
     """
     config = AgentConfig(
         max_iterations=settings.agent_max_iterations,
+        max_execution_time=settings.agent_max_execution_time,
         verbose=settings.api_debug,
     )
 
